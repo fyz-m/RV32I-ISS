@@ -1,24 +1,10 @@
-#include <cstdint>
-#include <array>
+#include "headers/memory.hpp"
 #include <fstream>
 #include <iostream>
 #include <ostream>
-#include <vector>
-#include <stdio.h>
-
-
-constexpr int REGISTER_FILE_SIZE = 32; 
-
-class RegisterFile
-{
-  private:
-
-     std::array <uint32_t, REGISTER_FILE_SIZE> m_registers{}; // RISC-V architecture contains 32 registers
-     
-  public:
 
     // TODO: add error checking for out of bounds index
-    void Write(uint32_t data, int address)
+    void RegisterFile::Write(uint32_t data, int address)
     {
       // Register x0 is hardwired to 0 so writes to the first register are ignored
       if (address == 0)
@@ -27,32 +13,19 @@ class RegisterFile
       m_registers[address] = data;
     }
 
-    uint32_t Read(int address)
+    uint32_t RegisterFile::Read(int address)
     {      
       return m_registers[address];
     }
     
-    
-};
-
-
 
 // Memory Class (32-bit so max 4GB)
 // TODO:
 // out of bounds checking
 // read/write half words (16 bits)
-class Memory
-{
-
-  private:
-    // byte-addressable memeory so memory must be an array of bytes
-    std::vector <uint8_t> m_memory {};
-    int m_WORD_SIZE;
-    int  m_INSTRUCTION_SIZE;
-
-  public:
+ 
     
-    Memory(int size = 512, int word_size = 32)
+    Memory::Memory(int size , int word_size)
       : m_WORD_SIZE {word_size},
         m_INSTRUCTION_SIZE {word_size / 8} // number of bytes 
     {
@@ -60,13 +33,13 @@ class Memory
       
     }
 
-    void Write(uint8_t data, int address)
+    void  Memory::Write(uint8_t data, int address)
     {
       // Write a byte
       m_memory[address] = data;
     }
     
-    void Write(uint32_t data, int address)
+    void  Memory::Write(uint32_t data, int address)
     {
       // Write a word (32-bit)
   
@@ -78,12 +51,12 @@ class Memory
 
     }
 
-    uint8_t Read_Byte(int address)
+    uint8_t  Memory::Read_Byte(int address)
     {
       return m_memory[address];
     }
 
-    uint32_t Read_Word(int address)
+    uint32_t Memory::Read_Word(int address)
     {
       uint32_t word {};
 
@@ -96,7 +69,7 @@ class Memory
       return word;
     }
 
-     bool Load(const char *file)
+     bool  Memory::Load(const char *file)
     {
       // Load contents of a file into the memory
       std::ifstream input_file{file, std::ios::binary};
@@ -116,4 +89,4 @@ class Memory
       input_file.close();
       return true;
     }
-};
+
