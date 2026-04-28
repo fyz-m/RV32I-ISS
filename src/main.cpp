@@ -7,18 +7,21 @@
 #include <iostream>
 #include <memory>
 
-void Step(char* filename);
+void load_file(char *filename);
+void Step();
 void fetch();
 void check_ptr();
 
 int main(int argc, char *argv[])
 {
   check_ptr();
-  Step(argv[2]);
+  load_file(argv[2]);
+  Step();
 }
 
-void Step(char* filename)
+void Step()
 {
+  // Loop until all instruction completed
   fetch();
   decode();
   execute();
@@ -43,4 +46,9 @@ void check_ptr()
       {
         std::cerr << "Could not initialize global pointer " << std::endl;
       }
+}
+
+void load_file(char *filename)
+{
+  instruction_memory->Load(filename);
 }
