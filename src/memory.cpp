@@ -1,3 +1,4 @@
+#pragma once
 #include "headers/memory.hpp"
 #include <fstream>
 #include <iostream>
