@@ -44,6 +44,13 @@ class Memory
     
 };
 
+
+enum class OPERATION 
+  {
+    UNKNOWN,
+    ADD, SUB
+  };
+
 typedef struct Instruction {
     uint32_t instruction {};
     uint8_t opcode {};
@@ -54,4 +61,8 @@ typedef struct Instruction {
     uint8_t rd {};
     uint32_t imm {};
 
+    OPERATION Operation = OPERATION::UNKNOWN; 
+
   } Instruction;
+
+  
