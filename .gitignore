@@ -1,4 +1,6 @@
 p.txt
 compiled
-launch.json
-settings.json
+.vscode
+.clangd
+.cache
+build
