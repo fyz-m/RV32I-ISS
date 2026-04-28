@@ -13,10 +13,7 @@ void RegisterFile::Write(uint32_t data, int address) {
   m_registers[address] = data;
 }
 
-uint32_t RegisterFile::Read(int address) const
-{ 
-  return m_registers[address]; 
-}
+uint32_t RegisterFile::Read(int address) const { return m_registers[address]; }
 
 // Memory Class (32-bit so max 4GB)
 // TODO:
@@ -28,10 +25,15 @@ Memory::Memory(int size, int word_size)
       m_INSTRUCTION_SIZE{word_size / 8} // number of bytes
 {
   m_memory.reserve(size);
+  m_memory.resize(1);
 }
 
 void Memory::Write(uint8_t data, int address) {
   // Write a byte
+
+  if (static_cast<long>(address) >= std::ssize(m_memory)) {
+    m_memory.resize(address + 1);
+  }
   m_memory[address] = data;
 }
 
@@ -44,13 +46,9 @@ void Memory::Write(uint32_t data, int address) {
   }
 }
 
-uint8_t Memory::Read_Byte(int address) const
-{ 
-  return m_memory[address];
-}
+uint8_t Memory::Read_Byte(int address) const { return m_memory[address]; }
 
-uint32_t Memory::Read_Word(int address) const
-{
+uint32_t Memory::Read_Word(int address) const {
   uint32_t word{};
 
   for (int i = 0; i < 4; i++) {
@@ -79,8 +77,7 @@ bool Memory::Load(const char *filepath) {
   return true;
 }
 
-int Memory::number_of_words() const
-{
+int Memory::number_of_words() const {
   // number of bytes / word_size
-  return std::ssize(m_memory) / m_WORD_SIZE;
+  return (std::ssize(m_memory) * 8) / m_WORD_SIZE;
 }
