@@ -23,15 +23,18 @@ int main(int argc, char *argv[]) {
   CPU CPU;
 
   // Create memory and load instructions
-  Memory *Instruction_Memory = new Memory(SIZE);
+  Memory *Instruction_Memory = new Memory();
   if (Instruction_Memory == nullptr) {
     std::cerr << "Unable to create Instruction Memory" << std::endl;
   }
 
-  // TEMP TESTS
+  //  TEST
+  ///////////////////////////////////////////////
   uint32_t inst = 0x003100b3;
   Instruction_Memory->Write(inst, 0);
-
+  CPU.Reg_write(10, 2);
+  CPU.Reg_write(10, 3);
+  ///////////////////////////////////////////////
   // Create memory for Data
   Memory *Data_Memory = new Memory(SIZE);
   if (Data_Memory == nullptr) {
