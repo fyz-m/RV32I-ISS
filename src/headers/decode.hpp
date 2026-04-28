@@ -1,5 +1,8 @@
 #pragma once
+#include "memory.hpp"
+#include <cstdint>
 
 
 
-void decode();
+
+void decode(Instruction* instruction);
