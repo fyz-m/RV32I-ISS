@@ -1,27 +1,19 @@
 #pragma once
+#include "headers/Globals.hpp"
 #include "headers/cpu.hpp"
 #include "headers/memory.hpp"
+#include "headers/decode.hpp"
+#include "headers/execute.hpp"
+#include <iostream>
 #include <memory>
 
 void Step(char* filename);
 void fetch();
-void decode();
-void execute();
-
-// Instantiate memory containing instructions
-std::unique_ptr <Memory> instruction_memory = std::make_unique <Memory>(); 
-
-// Create memory for data
-constexpr int DATA_SIZE = 1024;
-std::unique_ptr <Memory> data_memory = std::make_unique <Memory>(DATA_SIZE);
-
-// Create CPU
-std::unique_ptr <CPU> cpu = std::make_unique <CPU>();
-
+void check_ptr();
 
 int main(int argc, char *argv[])
 {
-
+  check_ptr();
   Step(argv[2]);
 }
 
@@ -36,7 +28,19 @@ void fetch()
 {
   // Fetch instruction from the instruction memory 
   // Address of instruction to fetch is the current value of the program counter
-  auto instruction = instruction_memory->Read_Word( cpu->PC_read());
+   *instruction_register = instruction_memory->Read_Word( cpu->PC_read());
 
-  
+  // Increment program counter to next address
+  cpu->PC_increment();
+}
+
+void check_ptr()
+{
+  if (instruction_memory == nullptr ||
+      data_memory == nullptr ||
+      cpu == nullptr ||
+      instruction_register == nullptr)
+      {
+        std::cerr << "Could not initialize global pointer " << std::endl;
+      }
 }
