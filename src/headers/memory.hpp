@@ -14,7 +14,7 @@ class RegisterFile
    
     void Write(uint32_t data, int address);
 
-    uint32_t Read(int address);
+    uint32_t Read(int address) const;
 };
 
 class Memory
@@ -34,10 +34,24 @@ class Memory
        
     void Write(uint32_t data, int address);
        
-    uint8_t Read_Byte(int address);
+    uint8_t Read_Byte(int address) const;
    
-    uint32_t Read_Word(int address);
+    uint32_t Read_Word(int address) const;
   
-    bool Load(const char *file);
+    bool Load(const char *filepath);
+
+    int number_of_words() const;
     
 };
+
+typedef struct Instruction {
+    uint32_t instruction {};
+    uint8_t opcode {};
+    uint8_t funct3 {};
+    uint8_t funct7 {};
+    uint8_t rs1 {};
+    uint8_t rs2 {};
+    uint8_t rd {};
+    uint32_t imm {};
+
+  } Instruction;
