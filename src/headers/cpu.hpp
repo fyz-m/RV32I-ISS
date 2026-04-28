@@ -1,5 +1,7 @@
 #pragma  once
 #include "memory.hpp"
+#include <cstdint>
+
 
 class CPU
 {
@@ -19,13 +21,13 @@ class CPU
     void PC_increment(void);
     
 
-    uint32_t PC_read(void);
+    uint32_t PC_read(void) const;
    
 
     void Reg_write(uint32_t data, int address);
   
 
-    uint32_t Reg_read(int address);
+    uint32_t Reg_read(int address) const;
    
 
 };
