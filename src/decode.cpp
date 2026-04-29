@@ -41,13 +41,27 @@ void decode_R_type(Instruction &fields) {
   extract_fields(fields, true, true, true, true, true);
 
   switch (fields.funct3) {
-  case 0b000:
+  case 0:
     fields.Operation = (fields.funct7 == 0) ? OPERATION::ADD : OPERATION::SUB;
   }
 }
 
 void decode_I_type(Instruction &fields) {
-  fields.rd = (fields.instruction >> 7) & 0x000F;
+
+  extract_fields(fields, true, true, true, true, true, true);
+
+  switch (fields.funct3) {
+  case 0:
+    fields.Operation = (fields.opcode == 19) ? OPERATION::ADDI : OPERATION::LB;    
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case 7:
+    break;
+  }
 }
 
 void decode_S_type(Instruction &fields) {
@@ -67,7 +81,7 @@ void decode_J_type(Instruction &fields) {
 }
 
 void extract_fields(Instruction &fields, bool rd, bool funct3, bool rs1,
-                    bool rs2, bool funct7) {
+                    bool rs2, bool funct7, bool immediate) {
   if (rd)
     fields.rd = extract_rd(fields.instruction);
   if (funct3)
@@ -78,6 +92,8 @@ void extract_fields(Instruction &fields, bool rd, bool funct3, bool rs1,
     fields.rs2 = extract_rs2(fields.instruction);
   if (funct7)
     fields.funct7 = extract_funct7(fields.instruction);
+  if (immediate)
+    fields.imm = extract_imm(fields);
 }
 
 uint8_t extract_rd(uint32_t &instruction) {
@@ -103,4 +119,24 @@ uint8_t extract_funct3(uint32_t &instruction) {
 uint8_t extract_funct7(uint32_t &instruction) {
   // Extract the 7-bit function field from an instruction
   return instruction >> 25;
+}
+
+uint32_t extract_imm(Instruction &fields) {
+
+  switch (fields.type) {
+
+  case TYPE::I_TYPE:
+    return fields.instruction >> 20;
+    break;
+  case TYPE::S_TYPE:
+    break;
+  case TYPE::B_TYPE:
+    break;
+  case TYPE::U_TYPE:
+    break;
+  case TYPE::J_TYPE:
+    break;
+  default:
+    return 0;
+  }
 }
