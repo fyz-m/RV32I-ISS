@@ -5,7 +5,7 @@
 #include <ostream>
 
 // TODO: add error checking for out of bounds index
-void RegisterFile::Write(uint32_t data, int address) {
+void RegisterFile::Write(int32_t data, int address) {
   // Register x0 is hardwired to 0 so writes to the first register are ignored
   if (address == 0)
     return;
@@ -13,7 +13,7 @@ void RegisterFile::Write(uint32_t data, int address) {
   m_registers[address] = data;
 }
 
-uint32_t RegisterFile::Read(int address) const { return m_registers[address]; }
+int32_t RegisterFile::Read(int address) const { return m_registers[address]; }
 
 // Memory Class (32-bit so max 4GB)
 // TODO:
@@ -29,8 +29,9 @@ Memory::Memory(int size, int word_size)
 }
 
 void Memory::Write(uint8_t data, int address) {
-  // Write a byte
+  // Write a byte at address
 
+  // If address is greater than current length, resize vector
   if (static_cast<long>(address) >= std::ssize(m_memory)) {
     m_memory.resize(address + 1);
   }
@@ -78,6 +79,6 @@ bool Memory::Load(const char *filepath) {
 }
 
 int Memory::number_of_words() const {
-  // number of bytes / word_size
+  // number of bits / word_size (bits per word)
   return (std::ssize(m_memory) * 8) / m_WORD_SIZE;
 }

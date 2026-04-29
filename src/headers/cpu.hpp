@@ -24,10 +24,10 @@ class CPU
     uint32_t PC_read(void) const;
    
 
-    void Reg_write(uint32_t data, int address);
+    void Reg_write(int32_t data, int address);
   
 
-    uint32_t Reg_read(int address) const;
+    int32_t Reg_read(int address) const;
    
 
 };

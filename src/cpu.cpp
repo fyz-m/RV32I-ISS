@@ -21,11 +21,11 @@ uint32_t CPU::PC_read(void) const
   return m_programCounter; 
 }
 
-void CPU::Reg_write(uint32_t data, int address) {
+void CPU::Reg_write(int32_t data, int address) {
   m_registerFile.Write(data, address);
 }
 
-uint32_t CPU::Reg_read(int address) const 
+int32_t CPU::Reg_read(int address) const 
 { 
   return m_registerFile.Read(address); 
 }
