@@ -24,3 +24,6 @@ uint8_t extract_rs2(uint32_t &instruction);
 uint8_t extract_funct3(uint32_t &instruction);
 
 uint8_t extract_funct7(uint32_t &instruction);
+
+void extract_fields(Instruction &fields, bool rd = false, bool funct3 = false,
+                    bool rs1 = false, bool rs2 = false, bool funct7 = false);
