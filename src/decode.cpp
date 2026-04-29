@@ -38,13 +38,8 @@ void decode(Instruction &instruction) {
 
 void decode_R_type(Instruction &fields) {
   // extract fields
+  extract_fields(fields, true, true, true, true, true);
 
-  fields.rd = extract_rd(fields.instruction);
-  fields.funct3 = extract_funct3(fields.instruction);
-  fields.rs1 = extract_rs1(fields.instruction);
-  fields.rs2 = extract_rs2(fields.instruction);
-  fields.funct7 = extract_funct7(fields.instruction);
-  // Set operation
   switch (fields.funct3) {
   case 0b000:
     fields.Operation = (fields.funct7 == 0) ? OPERATION::ADD : OPERATION::SUB;
@@ -53,9 +48,6 @@ void decode_R_type(Instruction &fields) {
 
 void decode_I_type(Instruction &fields) {
   fields.rd = (fields.instruction >> 7) & 0x000F;
-  fields.funct3 = (fields.instruction >> 12) & 0x00007;
-  fields.rs1 = (fields.instruction >> 15) & 0x0001F;
-  fields.imm = fields.instruction >> 20;
 }
 
 void decode_S_type(Instruction &fields) {
@@ -72,6 +64,20 @@ void decode_U_type(Instruction &fields) {
 
 void decode_J_type(Instruction &fields) {
   fields.rd = (fields.instruction >> 7) & 0x000F;
+}
+
+void extract_fields(Instruction &fields, bool rd, bool funct3, bool rs1,
+                    bool rs2, bool funct7) {
+  if (rd)
+    fields.rd = extract_rd(fields.instruction);
+  if (funct3)
+    fields.funct3 = extract_funct3(fields.instruction);
+  if (rs1)
+    fields.rs1 = extract_rs1(fields.instruction);
+  if (rs2)
+    fields.rs2 = extract_rs2(fields.instruction);
+  if (funct7)
+    fields.funct7 = extract_funct7(fields.instruction);
 }
 
 uint8_t extract_rd(uint32_t &instruction) {
