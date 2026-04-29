@@ -6,8 +6,8 @@
 #include <iostream>
 #include <ostream>
 
-void Step(CPU &CPU, const Memory *Instruction_Memory, Memory *Data_Memory);
-void fetch(CPU &CPU, const Memory *instruction_mem, Instruction *inst);
+void Step(CPU &CPU, const Memory &Instruction_Memory, Memory *Data_Memory);
+void fetch(CPU &CPU, const Memory &Instruction_Memory, Instruction &fields);
 void test_inst(Memory &Instruction_Memory);
 constexpr int SIZE = 1024;
 
@@ -20,57 +20,50 @@ int main(int argc, char *argv[]) {
   }
 
   // Create CPU object with register file + pc
-  CPU CPU;
+  CPU cpu;
 
   // Create memory and load instructions
-  Memory *Instruction_Memory = new Memory();
-  if (Instruction_Memory == nullptr) {
-    std::cerr << "Unable to create Instruction Memory" << std::endl;
-  }
+  Memory Instruction_Memory;
 
   //  TEST
   ///////////////////////////////////////////////
   uint32_t inst = 0x003100b3;
-  Instruction_Memory->Write(inst, 0);
-  CPU.Reg_write(10, 2);
-  CPU.Reg_write(10, 3);
+  Instruction_Memory.Write(inst, 0);
+  cpu.Reg_write(10, 2);
+  cpu.Reg_write(10, 3);
   ///////////////////////////////////////////////
   // Create memory for Data
   Memory *Data_Memory = new Memory(SIZE);
-  if (Data_Memory == nullptr) {
-    std::cerr << "Unable to create Data Memory" << std::endl;
-  }
 
-  Step(CPU, Instruction_Memory, Data_Memory);
+  Step(cpu, Instruction_Memory, Data_Memory);
+
+  std::cout << "Instruction :";
+  std::cout << std::hex << Instruction_Memory.Read_Word(0) << std::endl;
+  std::cout << "register x1 :";
+  std::cout << std::dec << cpu.Reg_read(1) << std::endl;
 
   delete Data_Memory;
-  delete Instruction_Memory;
 }
 
-void Step(CPU &CPU, const Memory *Instruction_Memory, Memory *Data_Memory) {
+void Step(CPU &CPU, const Memory &Instruction_Memory, Memory *Data_Memory) {
 
-  Instruction *instr = new (Instruction);
-  if (instr == nullptr) {
-    std::cerr << "Unable to create Instruction struct" << std::endl;
-  }
+  Instruction Instruction_fields = {};
 
-  int num_instr = Instruction_Memory->number_of_words();
+  int num_instr = Instruction_Memory.number_of_words();
 
   // Loop until all instruction completed
   for (int cycles = 0; cycles < num_instr; cycles++) {
-    fetch(CPU, Instruction_Memory, instr);
-    decode(instr);
-    execute(CPU, Data_Memory, instr);
+    fetch(CPU, Instruction_Memory, Instruction_fields);
+    decode(Instruction_fields);
+    execute(CPU, Data_Memory, Instruction_fields);
   }
-
-  delete instr;
 }
 
-void fetch(CPU &CPU, const Memory *instruction_mem, Instruction *inst) {
+void fetch(CPU &CPU, const Memory &Instruction_Memory, Instruction &fields) {
 
   // Fetch the instruction and store it in the instruction register
   // Address of instruction to fetch = value in program counter
-  inst->instruction = instruction_mem->Read_Word(CPU.PC_read());
+  fields.instruction = Instruction_Memory.Read_Word(CPU.PC_read());
 
   // PC += 4
   CPU.PC_increment();
