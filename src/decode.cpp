@@ -83,60 +83,65 @@ void decode_J_type(Instruction &fields) {
 void extract_fields(Instruction &fields, bool rd, bool funct3, bool rs1,
                     bool rs2, bool funct7, bool immediate) {
   if (rd)
-    fields.rd = extract_rd(fields.instruction);
+     extract_rd(fields);
   if (funct3)
-    fields.funct3 = extract_funct3(fields.instruction);
+     extract_funct3(fields);
   if (rs1)
-    fields.rs1 = extract_rs1(fields.instruction);
+     extract_rs1(fields);
   if (rs2)
-    fields.rs2 = extract_rs2(fields.instruction);
+     extract_rs2(fields);
   if (funct7)
-    fields.funct7 = extract_funct7(fields.instruction);
+    extract_funct7(fields);
   if (immediate)
-    fields.imm = extract_imm(fields);
+     extract_imm(fields);
 }
 
-uint8_t extract_rd(uint32_t &instruction) {
+void extract_rd(Instruction &fields) {
   // Extract the destination register from an instruction
-  return (instruction >> 7) & 0x000F;
+  fields.rd = (fields.instruction >> 7) & 0x000F;
 }
 
-uint8_t extract_rs1(uint32_t &instruction) {
+void extract_rs1(Instruction &fields) {
   // Extract the first source register from an instruction
-  return (instruction >> 15) & 0x0001F;
+  fields.rs1 = (fields.instruction >> 15) & 0x0001F;
 }
 
-uint8_t extract_rs2(uint32_t &instruction) {
+void extract_rs2(Instruction &fields) {
   // Extract the second source register from an instruction
-  return (instruction >> 20) & 0x01F;
+  fields.rs2 = (fields.instruction >> 20) & 0x01F;
 }
 
-uint8_t extract_funct3(uint32_t &instruction) {
+void extract_funct3(Instruction &fields) {
   // Extract the 3-bit function field from an instruction
-  return (instruction >> 12) & 0x00007;
+  fields.funct3 = (fields.instruction >> 12) & 0x00007;
 }
 
-uint8_t extract_funct7(uint32_t &instruction) {
+void extract_funct7(Instruction &fields) {
   // Extract the 7-bit function field from an instruction
-  return instruction >> 25;
+  fields.funct7 = fields.instruction >> 25;
 }
 
-uint32_t extract_imm(Instruction &fields) {
+void extract_imm(Instruction &fields) {
 
   switch (fields.type) {
 
   case TYPE::I_TYPE:
-    return fields.instruction >> 20;
+    fields.imm =  fields.instruction >> 20;
     break;
+
   case TYPE::S_TYPE:
     break;
+
   case TYPE::B_TYPE:
     break;
+
   case TYPE::U_TYPE:
     break;
+
   case TYPE::J_TYPE:
     break;
+    
   default:
-    return 0;
+    break;
   }
 }

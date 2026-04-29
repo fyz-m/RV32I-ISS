@@ -15,15 +15,18 @@ void decode_U_type(Instruction &fields);
 
 void decode_J_type(Instruction &fields);
 
-uint8_t extract_rd(uint32_t &instruction);
+void extract_rd(Instruction &fields);
 
-uint8_t extract_rs1(uint32_t &instruction);
+void extract_rs1(Instruction &fields);
 
-uint8_t extract_rs2(uint32_t &instruction);
+void extract_rs2(Instruction &fields);
 
-uint8_t extract_funct3(uint32_t &instruction);
+void extract_funct3(Instruction &fields);
 
-uint8_t extract_funct7(uint32_t &instruction);
+void extract_funct7(Instruction &fields);
+
+void extract_imm(Instruction &fields);
 
 void extract_fields(Instruction &fields, bool rd = false, bool funct3 = false,
-                    bool rs1 = false, bool rs2 = false, bool funct7 = false);
+                    bool rs1 = false, bool rs2 = false, bool funct7 = false,
+                    bool immediate = false);
