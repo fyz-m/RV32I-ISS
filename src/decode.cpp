@@ -74,27 +74,27 @@ void decode_J_type(Instruction &fields) {
   fields.rd = (fields.instruction >> 7) & 0x000F;
 }
 
-uint8_t extract_rd(uint32_t instruction) {
+uint8_t extract_rd(uint32_t &instruction) {
   // Extract the destination register from an instruction
   return (instruction >> 7) & 0x000F;
 }
 
-uint8_t extract_rs1(uint32_t instruction) {
+uint8_t extract_rs1(uint32_t &instruction) {
   // Extract the first source register from an instruction
   return (instruction >> 15) & 0x0001F;
 }
 
-uint8_t extract_rs2(uint32_t instruction) {
+uint8_t extract_rs2(uint32_t &instruction) {
   // Extract the second source register from an instruction
   return (instruction >> 20) & 0x01F;
 }
 
-uint8_t extract_funct3(uint32_t instruction) {
+uint8_t extract_funct3(uint32_t &instruction) {
   // Extract the 3-bit function field from an instruction
   return (instruction >> 12) & 0x00007;
 }
 
-uint8_t extract_funct7(uint32_t instruction) {
+uint8_t extract_funct7(uint32_t &instruction) {
   // Extract the 7-bit function field from an instruction
   return instruction >> 25;
 }
