@@ -1,32 +1,47 @@
 #pragma once
 #include "memory.hpp"
+#include "cpu.hpp"
 
-void decode(Instruction &instruction);
 
-void decode_R_type(Instruction &fields);
 
-void decode_I_type(Instruction &fields);
 
-void decode_S_type(Instruction &fields);
+  void decode(DecodedInstruction &input_instruction);
 
-void decode_B_type(Instruction &fields);
 
-void decode_U_type(Instruction &fields);
+  void decode_R_type(DecodedInstruction& fields);
 
-void decode_J_type(Instruction &fields);
+  void decode_I_type(DecodedInstruction& fields);
 
-void extract_rd(Instruction &fields);
+  void decode_S_type(DecodedInstruction& fields);
 
-void extract_rs1(Instruction &fields);
+  void decode_B_type(DecodedInstruction& fields);
 
-void extract_rs2(Instruction &fields);
+  void decode_U_type(DecodedInstruction& fields);
 
-void extract_funct3(Instruction &fields);
+  void decode_J_type(DecodedInstruction& fields);
 
-void extract_funct7(Instruction &fields);
+  void extract_rd(DecodedInstruction& fields);
 
-void extract_imm(Instruction &fields);
+  void extract_rs1(DecodedInstruction& fields);
 
-void extract_fields(Instruction &fields, bool rd = false, bool funct3 = false,
-                    bool rs1 = false, bool rs2 = false, bool funct7 = false,
-                    bool immediate = false);
+  void extract_rs2(DecodedInstruction& fields);
+
+  void extract_funct3(DecodedInstruction& fields);
+
+  void extract_funct7(DecodedInstruction& fields);
+
+  void extract_imm(DecodedInstruction& fields);
+
+  void extract_R_type(DecodedInstruction& fields);
+
+  void extract_I_type(DecodedInstruction& fields);
+
+  void extract_S_type(DecodedInstruction& fields);
+
+  void extract_B_type(DecodedInstruction& fields);
+
+  void extract_U_type(DecodedInstruction& fields);
+
+  void extract_J_type(DecodedInstruction& fields);
+
+  void set_type(DecodedInstruction& fields);
