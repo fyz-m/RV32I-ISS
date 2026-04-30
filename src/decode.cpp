@@ -6,7 +6,7 @@
 void decode(DecodedInstruction &input_instruction) {
   
   input_instruction.opcode = input_instruction.raw_inst & 0x0000007F;
-
+  set_type(input_instruction);
   switch (input_instruction.type) {
 
   case TYPE::R_TYPE:
@@ -53,15 +53,18 @@ void decode_R_type(DecodedInstruction& fields) {
   switch (fields.funct3) {
   case 0:
     fields.Operation = (fields.funct7 == 0) ? OPERATION::ADD : OPERATION::SUB;
+    break;
   }
 }
 
 void decode_I_type(DecodedInstruction& fields) {
 
+  extract_I_type(fields);
 
   switch (fields.funct3) {
   case 0:
-    fields.Operation = (fields.opcode == 19) ? OPERATION::ADDI : OPERATION::LB;    
+    fields.Operation = (fields.opcode == 19) ? OPERATION::ADDI : OPERATION::LB; 
+    break;   
   case 1:
   case 2:
   case 3:
@@ -76,6 +79,18 @@ void decode_I_type(DecodedInstruction& fields) {
 void decode_S_type(DecodedInstruction& fields) {
 
   extract_S_type(fields);
+
+  switch (fields.funct3) {
+  case 0:
+    fields.Operation = OPERATION::SB;
+    break;
+  case 1:
+    fields.Operation = OPERATION::SH;
+    break; 
+  case 2:
+    fields.Operation = OPERATION::SW;
+    break;
+  }
 }
 
 void decode_B_type(DecodedInstruction& fields) {
@@ -115,6 +130,14 @@ void extract_S_type(DecodedInstruction& fields)
   extract_funct3(fields);
   extract_rs1(fields);
   extract_rs2(fields);
+
+  // Imm[4:0]
+  auto imm_4_0 = (fields.raw_inst >> 7) & 0x1F;
+
+  // Imm[11:5]
+  auto imm_11_5 = fields.raw_inst >> 24;
+  
+  fields.imm = imm_4_0 | imm_11_5;
 }
 
 void extract_B_type(DecodedInstruction& fields)
