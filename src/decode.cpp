@@ -1,34 +1,36 @@
 #include "headers/decode.hpp"
+#include "headers/cpu.hpp"
 #include "headers/memory.hpp"
 #include <iostream>
 
-void decode(Instruction &instruction) {
+void decode(DecodedInstruction &input_instruction) {
 
-  instruction.opcode = instruction.instruction & 0x0000007F;
+  
+  input_instruction.opcode = input_instruction.raw_inst & 0x0000007F;
 
-  switch (instruction.opcode) {
-  case 51:
-    decode_R_type(instruction);
+  switch (input_instruction.type) {
+  case TYPE::R_TYPE:
+    decode_R_type(input_instruction);
     break;
 
-  case (19 | 3 | 103):
-    decode_I_type(instruction);
+  case TYPE::I_TYPE:
+    decode_I_type(input_instruction);
     break;
 
-  case 35:
-    decode_S_type(instruction);
+  case TYPE::S_TYPE:
+    decode_S_type(input_instruction);
     break;
 
-  case 99:
-    decode_B_type(instruction);
+  case TYPE::B_TYPE:
+    decode_B_type(input_instruction);
     break;
 
-  case (55 | 23):
-    decode_U_type(instruction);
+  case TYPE::U_TYPE:
+    decode_U_type(input_instruction);
     break;
 
-  case (111):
-    decode_J_type(instruction);
+  case TYPE::J_TYPE:
+    decode_J_type(input_instruction);
     break;
 
   default:
@@ -36,19 +38,20 @@ void decode(Instruction &instruction) {
   }
 }
 
-void decode_R_type(Instruction &fields) {
-  // extract fields
-  extract_fields(fields, true, true, true, true, true);
 
+void decode_R_type(DecodedInstruction& fields) {
+  // extract fields
+  extract_R_type(fields);
+
+  // Set operation
   switch (fields.funct3) {
   case 0:
     fields.Operation = (fields.funct7 == 0) ? OPERATION::ADD : OPERATION::SUB;
   }
 }
 
-void decode_I_type(Instruction &fields) {
+void decode_I_type(DecodedInstruction& fields) {
 
-  extract_fields(fields, true, true, true, true, true, true);
 
   switch (fields.funct3) {
   case 0:
@@ -64,84 +67,80 @@ void decode_I_type(Instruction &fields) {
   }
 }
 
-void decode_S_type(Instruction &fields) {
-  fields.rd = (fields.instruction >> 7) & 0x000F;
+void decode_S_type(DecodedInstruction& fields) {
+  fields.rd = (fields.raw_inst >> 7) & 0x000F;
 }
 
-void decode_B_type(Instruction &fields) {
-  fields.rd = (fields.instruction >> 7) & 0x000F;
+void decode_B_type(DecodedInstruction& fields) {
+  fields.rd = (fields.raw_inst >> 7) & 0x000F;
 }
 
-void decode_U_type(Instruction &fields) {
-  fields.rd = (fields.instruction >> 7) & 0x000F;
+void decode_U_type(DecodedInstruction& fields) {
+  fields.rd = (fields.raw_inst >> 7) & 0x000F;
 }
 
-void decode_J_type(Instruction &fields) {
-  fields.rd = (fields.instruction >> 7) & 0x000F;
+void decode_J_type(DecodedInstruction& fields) {
+  fields.rd = (fields.raw_inst >> 7) & 0x000F;
 }
 
-void extract_fields(Instruction &fields, bool rd, bool funct3, bool rs1,
-                    bool rs2, bool funct7, bool immediate) {
-  if (rd)
-     extract_rd(fields);
-  if (funct3)
-     extract_funct3(fields);
-  if (rs1)
-     extract_rs1(fields);
-  if (rs2)
-     extract_rs2(fields);
-  if (funct7)
-    extract_funct7(fields);
-  if (immediate)
-     extract_imm(fields);
-}
 
-void extract_rd(Instruction &fields) {
+
+void extract_rd(DecodedInstruction& fields) {
   // Extract the destination register from an instruction
-  fields.rd = (fields.instruction >> 7) & 0x000F;
+  fields.rd = (fields.raw_inst >> 7) & 0x000F;
 }
 
-void extract_rs1(Instruction &fields) {
+void extract_rs1(DecodedInstruction& fields) {
   // Extract the first source register from an instruction
-  fields.rs1 = (fields.instruction >> 15) & 0x0001F;
+  fields.rs1 = (fields.raw_inst >> 15) & 0x0001F;
 }
 
-void extract_rs2(Instruction &fields) {
+void extract_rs2(DecodedInstruction& fields) {
   // Extract the second source register from an instruction
-  fields.rs2 = (fields.instruction >> 20) & 0x01F;
+  fields.rs2 = (fields.raw_inst >> 20) & 0x01F;
 }
 
-void extract_funct3(Instruction &fields) {
+void extract_funct3(DecodedInstruction& fields) {
   // Extract the 3-bit function field from an instruction
-  fields.funct3 = (fields.instruction >> 12) & 0x00007;
+  fields.funct3 = (fields.raw_inst >> 12) & 0x00007;
 }
 
-void extract_funct7(Instruction &fields) {
+void extract_funct7(DecodedInstruction& fields) {
   // Extract the 7-bit function field from an instruction
-  fields.funct7 = fields.instruction >> 25;
+  fields.funct7 = fields.raw_inst >> 25;
 }
 
-void extract_imm(Instruction &fields) {
-
-  switch (fields.type) {
-
-  case TYPE::I_TYPE:
-    fields.imm =  fields.instruction >> 20;
+void set_type(DecodedInstruction& fields)
+{
+  switch (fields.opcode) {
+  case 51:
+    fields.type = TYPE::R_TYPE; 
     break;
 
-  case TYPE::S_TYPE:
+  case 19:
+  case 3:
+  case 103:
+    fields.type = TYPE::I_TYPE;
     break;
 
-  case TYPE::B_TYPE:
+  case 35:
+    fields.type = TYPE::S_TYPE;
     break;
 
-  case TYPE::U_TYPE:
+  case 99:
+    fields.type = TYPE::B_TYPE;
     break;
 
-  case TYPE::J_TYPE:
+  case 55:
+  case 23:
+    fields.type = TYPE::U_TYPE;
     break;
-    
+
+  case 111:
+    fields.type = TYPE::J_TYPE;
+    break;
+
   default:
-    break;
+    std::cerr << "Unable to resolve instruction type" << std::endl;
   }
 }
