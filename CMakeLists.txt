@@ -9,8 +9,7 @@ add_executable(rv32i_sim
       src/main.cpp
       src/cpu.cpp
       src/memory.cpp 
-      src/decode.cpp 
-      src/execute.cpp)
+      src/decode.cpp)
 
 target_include_directories(rv32i_sim PRIVATE headers)
 
