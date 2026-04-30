@@ -83,7 +83,46 @@ void decode_J_type(DecodedInstruction& fields) {
   fields.rd = (fields.raw_inst >> 7) & 0x000F;
 }
 
+void extract_R_type(DecodedInstruction& fields)
+{
+  extract_rd(fields);
+  extract_funct3(fields);
+  extract_rs1(fields);
+  extract_rs2(fields);
+  extract_funct7(fields);
+}
 
+void extract_I_type(DecodedInstruction& fields)
+{
+  extract_rd(fields);
+  extract_funct3(fields);
+  extract_rs1(fields);
+  fields.imm = fields.raw_inst >> 20;
+}
+
+void extract_S_type(DecodedInstruction& fields)
+{
+  extract_funct3(fields);
+  extract_rs1(fields);
+  extract_rs2(fields);
+}
+
+void extract_B_type(DecodedInstruction& fields)
+{
+  // Same fields as S-type, immediate is encoded differently
+  extract_S_type(fields);
+}
+
+void extract_U_type(DecodedInstruction& fields)
+{
+  extract_rd(fields);
+}
+
+void extract_J_type(DecodedInstruction& fields)
+{
+  // Same fields as U-type, immediate is encoded differently
+  extract_U_type(fields);
+}
 
 void extract_rd(DecodedInstruction& fields) {
   // Extract the destination register from an instruction
