@@ -96,6 +96,26 @@ void decode_S_type(DecodedInstruction& fields) {
 void decode_B_type(DecodedInstruction& fields) {
 
   extract_B_type(fields);
+
+  switch (fields.funct3) {
+  case 0:
+    fields.Operation = OPERATION::BEQ; 
+    break;   
+  case 1:
+    fields.Operation = OPERATION::BNE; 
+    break;
+  case 4:
+    fields.Operation = OPERATION::BLT; 
+    break;
+  case 5:
+    fields.Operation = OPERATION::BGE; 
+    break;
+  case 6:
+    fields.Operation = OPERATION::BLTU; 
+    break;
+  case 7:
+    fields.Operation = OPERATION::BGEU; 
+  }
 }
 
 void decode_U_type(DecodedInstruction& fields) {
@@ -137,13 +157,30 @@ void extract_S_type(DecodedInstruction& fields)
   // Imm[11:5]
   auto imm_11_5 = fields.raw_inst >> 24;
   
-  fields.imm = imm_4_0 | imm_11_5;
+  fields.imm = (imm_11_5 << 5) | (imm_4_0);
 }
 
 void extract_B_type(DecodedInstruction& fields)
 {
-  // Same fields as S-type, immediate is encoded differently
-  extract_S_type(fields);
+  extract_funct3(fields);
+  extract_rs1(fields);
+  extract_rs2(fields);
+  
+  // Imm[11]
+  auto imm_11 = (fields.raw_inst >> 7) & 0x1;
+
+  // Imm[4:1]
+  // Bit 0 is not encoded because branch offsets (n.o bytes to instruction to jump to) are always a multiple of 4
+  // Because each RISC-V instructions are 32-bit (4-bytes)
+  auto imm_4_1 = (fields.raw_inst >> 8) & 0xF;
+
+  // Imm[10:5]
+  auto imm_10_5 = (fields.raw_inst >> 25) & 0x1F;
+
+  // Imm[12]
+  auto imm_12 = fields.raw_inst >> 31;
+
+  fields.imm = (imm_12 << 12) | (imm_11 << 11) | (imm_10_5 << 5) | (imm_4_1) | 0b0;
 }
 
 void extract_U_type(DecodedInstruction& fields)
