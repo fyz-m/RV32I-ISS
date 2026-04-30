@@ -2,9 +2,13 @@
 #include "headers/memory.hpp"
 #include "headers/decode.hpp"
 #include <cstdint>
+#include <memory>
 
-  CPU::CPU(int) 
-    : program_counter{}, register_file() 
+  CPU::CPU(int width, std::shared_ptr<Memory> Instruction_Memory_ptr, std::shared_ptr<Memory> Data_Memory_ptr) 
+    : instruction_register{}, instruction_fields{} , program_counter{},
+      register_file(width), 
+      Instruction_Memory(Instruction_Memory_ptr), 
+      Data_Memory(Data_Memory_ptr)
     {}
 
 
@@ -52,10 +56,11 @@
                  result = operand1 - operand2;
                  break;
             
-            default: break; 
+            default: 
+              break; 
           }
-          // Write result back to register rs2
-          writeReg(i.rs2, result);
+          // Write result back to register rd
+          writeReg(i.rd, result);
           break;
         }
 
@@ -83,8 +88,8 @@
             default: break; 
           }
 
-          // Write result back to register rs2
-          writeReg(i.rs2, result);
+          // Write result back to register rd
+          writeReg(i.rd, result);
           break;
         }
 
@@ -95,7 +100,7 @@
       case TYPE::UNKNOWN:
       break;
      }
-    }
+  }
   
 
   void CPU::writePC(uint32_t data) 
