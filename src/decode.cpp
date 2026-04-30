@@ -1,35 +1,41 @@
 #include "headers/decode.hpp"
 #include "headers/cpu.hpp"
-#include "headers/memory.hpp"
 #include <iostream>
 
-void decode(DecodedInstruction &input_instruction) {
 
+void decode(DecodedInstruction &input_instruction) {
   
   input_instruction.opcode = input_instruction.raw_inst & 0x0000007F;
 
   switch (input_instruction.type) {
+
   case TYPE::R_TYPE:
+
     decode_R_type(input_instruction);
     break;
 
   case TYPE::I_TYPE:
+
     decode_I_type(input_instruction);
     break;
 
   case TYPE::S_TYPE:
+
     decode_S_type(input_instruction);
     break;
 
   case TYPE::B_TYPE:
+
     decode_B_type(input_instruction);
     break;
 
   case TYPE::U_TYPE:
+
     decode_U_type(input_instruction);
     break;
 
   case TYPE::J_TYPE:
+
     decode_J_type(input_instruction);
     break;
 
@@ -68,19 +74,23 @@ void decode_I_type(DecodedInstruction& fields) {
 }
 
 void decode_S_type(DecodedInstruction& fields) {
-  fields.rd = (fields.raw_inst >> 7) & 0x000F;
+
+  extract_S_type(fields);
 }
 
 void decode_B_type(DecodedInstruction& fields) {
-  fields.rd = (fields.raw_inst >> 7) & 0x000F;
+
+  extract_B_type(fields);
 }
 
 void decode_U_type(DecodedInstruction& fields) {
-  fields.rd = (fields.raw_inst >> 7) & 0x000F;
+
+  extract_U_type(fields);
 }
 
 void decode_J_type(DecodedInstruction& fields) {
-  fields.rd = (fields.raw_inst >> 7) & 0x000F;
+
+  extract_J_type(fields);
 }
 
 void extract_R_type(DecodedInstruction& fields)
@@ -126,7 +136,7 @@ void extract_J_type(DecodedInstruction& fields)
 
 void extract_rd(DecodedInstruction& fields) {
   // Extract the destination register from an instruction
-  fields.rd = (fields.raw_inst >> 7) & 0x000F;
+  fields.rd =  (fields.raw_inst >> 7) & 0x000F;
 }
 
 void extract_rs1(DecodedInstruction& fields) {

@@ -1,12 +1,7 @@
 #pragma once
-#include "memory.hpp"
 #include "cpu.hpp"
 
-
-
-
   void decode(DecodedInstruction &input_instruction);
-
 
   void decode_R_type(DecodedInstruction& fields);
 
