@@ -90,10 +90,38 @@
 
           // Write result back to register rd
           writeReg(i.rd, result);
-          break;
+          return;
         }
 
       case TYPE::S_TYPE:
+        {
+          // Memory address to store value in rs2 = value in rs1 + imm
+          int address = readReg(i.rs1) + i.imm;
+          uint32_t rs2 = readReg(i.rs2);
+
+          switch (i.Operation) 
+          {
+            
+            case OPERATION::SB:
+                 // Store first 2 bytes of rs2
+                 Data_Memory->Write(static_cast<uint8_t>(rs2), address);
+                 return;
+
+            case OPERATION::SH:
+                 // Store first 4 bytes of rs2
+                 Data_Memory->Write(static_cast<uint16_t>(rs2), address);
+                 return;
+
+            case OPERATION::SW:
+                 // Store rs2
+                 Data_Memory->Write(rs2, address);
+                 return;
+
+            default: 
+                return; 
+          }          
+        }
+
       case TYPE::B_TYPE:
       case TYPE::U_TYPE:
       case TYPE::J_TYPE:
