@@ -52,9 +52,20 @@
 
   void Memory::Write(uint32_t data, int address) 
   {
-    // Write a word (32-bit)
+    // Write a word (4 bytes)
+    for (int i = 0; i < 4; i++) 
+    {
+      uint8_t data_byte = data >> (i * 8);
+      Write(data_byte, address + i);
+    }
+  }
 
-    for (int i = 0; i < 4; i++) {
+  void Memory::Write(uint16_t data, int address)
+  {
+    // Write a half-word (2 bytes)
+    for (int i = 0; i < 2; i++) 
+    {
+      // Extract byte to write
       uint8_t data_byte = data >> (i * 8);
       Write(data_byte, address + i);
     }

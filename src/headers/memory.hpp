@@ -34,6 +34,8 @@ public:
 
   void Write(uint32_t data, int address);
 
+  void Write(uint16_t data, int address);
+
   uint8_t Read_Byte(int address) const;
 
   uint32_t Read_Word(int address) const;
