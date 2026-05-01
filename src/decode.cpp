@@ -1,5 +1,6 @@
 #include "headers/decode.hpp"
 #include "headers/cpu.hpp"
+#include <cstdint>
 #include <iostream>
 
 
@@ -142,7 +143,7 @@ void extract_I_type(DecodedInstruction& fields)
   extract_rd(fields);
   extract_funct3(fields);
   extract_rs1(fields);
-  fields.imm = fields.raw_inst >> 20;
+  fields.imm = static_cast<int32_t>(fields.raw_inst) >> 20;
 }
 
 void extract_S_type(DecodedInstruction& fields)
