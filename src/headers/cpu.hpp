@@ -68,14 +68,14 @@ class CPU
     RegisterFile register_file;
 
     // Memory containing instructions 
-    Memory Instruction_Memory;
+    std::shared_ptr <Memory> Instruction_Memory;
 
     // Memory for data
     std::shared_ptr <Memory> Data_Memory;
 
   public:
 
-    CPU(int width = 32);
+    CPU(int width = 32, std::shared_ptr<Memory> Instruction_Memory_ptr = nullptr, std::shared_ptr<Memory> Data_Memory_ptr = nullptr);
     
     void Step();
 
@@ -83,7 +83,7 @@ class CPU
 
     uint32_t readPC() const;
     
-  private:
+  // prviate:
 
     // Fetch instruction at address[PC] and write it to the instruction register
     void Fetch();
