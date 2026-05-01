@@ -77,10 +77,19 @@ class CPU
 
     CPU(int width = 32, std::shared_ptr<Memory> Instruction_Memory_ptr = nullptr, std::shared_ptr<Memory> Data_Memory_ptr = nullptr);
     
+    // Complete one instruction ( Fetch/decode/execute )
     void Step();
 
+    // Returns the pointer of the memory object CPU is fetching instructions from
+    std::shared_ptr<Memory> getInstructionMemory() const; 
+
+    // Returns the pointer of the memory object CPU is using for data reads/writes
+    std::shared_ptr<Memory> getDataMemory() const; 
+
+    // Returns the value in the register[address]
     int32_t readReg(int address) const;
 
+    // Returns the current value of the program counter
     uint32_t readPC() const;
     
   // prviate:
@@ -94,10 +103,13 @@ class CPU
     // Execute the operation
     void Execute();
 
+    // Write a value to the program counter
     void writePC(uint32_t data);
     
+    // Increment program counter to the next instruction
     void incrementPC();
     
+    // Write to register[address]
     void writeReg(int address, int32_t data);
   
 
