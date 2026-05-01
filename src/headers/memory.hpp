@@ -21,12 +21,13 @@ public:
 class Memory {
 
 private:
-  // byte-addressable memeory so memory must be an array of bytes
+  // RISC-V uses byte-addressable memory, so memory must be an array of bytes
   std::vector<uint8_t> m_memory{};
   int m_WORD_SIZE;
   int m_INSTRUCTION_SIZE;
 
 public:
+
   Memory(int size = 512, int word_size = 32);
 
   void Write(uint8_t data, int address);
@@ -36,6 +37,8 @@ public:
   uint8_t Read_Byte(int address) const;
 
   uint32_t Read_Word(int address) const;
+
+  uint16_t Read_halfWord(int address) const;
 
   bool Load(const char *filepath);
 
