@@ -186,12 +186,13 @@ void extract_B_type(DecodedInstruction& fields)
 void extract_U_type(DecodedInstruction& fields)
 {
   extract_rd(fields);
+  fields.imm = fields.raw_inst >> 12;
 }
 
 void extract_J_type(DecodedInstruction& fields)
 {
   // Same fields as U-type, immediate is encoded differently
-  extract_U_type(fields);
+  extract_rd(fields);
 }
 
 void extract_rd(DecodedInstruction& fields) {
