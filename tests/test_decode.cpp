@@ -174,6 +174,48 @@ INSTANTIATE_TEST_SUITE_P(B_TYPE_DECODE_TEST, BtypeTest,
       }
 );
 
+struct UtypeCase {
+    uint32_t instruction;
+    uint8_t expected_rd; 
+    int32_t expected_imm;
+    OPERATION expected_op;
+    std::string test_name; 
+};
+
+class UtypeTest : public ::testing::TestWithParam<UtypeCase> {};
+
+TEST_P(UtypeTest, decode_U_type_instructions)
+{
+    UtypeCase tc = GetParam();
+
+    DecodedInstruction fields;
+    fields.raw_inst = tc.instruction;
+
+    decode(fields);
+
+    EXPECT_EQ(fields.rd, tc.expected_rd);
+    EXPECT_EQ(fields.imm, tc.expected_imm) << "Incorrect immediate extraction (may not be properly sign extended)";
+    EXPECT_EQ(fields.Operation, tc.expected_op);
+}
+
+INSTANTIATE_TEST_SUITE_P(U_TYPE_DECODE_TEST, UtypeTest,
+
+    ::testing::Values(
+      UtypeCase{0x000142b7, 5, 20, OPERATION::LUI, "lui_basic"}, // lui x5, 20
+      UtypeCase{0x00014297, 5, 20, OPERATION::AUIPC, "auipc_basic"}, // auipc x5, 20
+
+      // Immediate tests
+      UtypeCase{0xffe0c0b7, 1, -500,OPERATION::LUI, "u_type_imm_negative"}, // lui, x1, -500
+      UtypeCase{0x800000b7, 1, -524288,OPERATION::LUI, "u_type_imm_min"}, // lui, x1, -524288
+      UtypeCase{0x7ffff0b7, 1, 524287,OPERATION::LUI, "u_type_imm_max"} // lui, x1, 524287
+
+    ),
+
+    [](const ::testing::TestParamInfo<UtypeCase>& info) {
+      return info.param.test_name;
+      }
+);
+
 
 
 
