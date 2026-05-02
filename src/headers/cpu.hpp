@@ -92,7 +92,7 @@ class CPU
     // Returns the current value of the program counter
     uint32_t readPC() const;
     
-  // prviate:
+  private:
 
     // Fetch instruction at address[PC] and write it to the instruction register
     void Fetch();
@@ -112,7 +112,17 @@ class CPU
     // Write to register[address]
     void writeReg(int address, int32_t data);
   
+    void execute_R_type();
 
+    void execute_I_type();
+
+    void execute_S_type();
+
+    void execute_B_type();
+
+    void execute_U_type();
+
+    void execute_J_type();
 };
 
 
