@@ -177,18 +177,19 @@ void extract_B_type(DecodedInstruction& fields)
   auto imm_4_1 = (fields.raw_inst >> 8) & 0xF;
 
   // Imm[10:5]
-  auto imm_10_5 = (fields.raw_inst >> 25) & 0x1F;
+  auto imm_10_5 = (fields.raw_inst >> 25) & 0x3F;
 
   // Imm[12]
-  auto imm_12 = fields.raw_inst >> 31;
+  // Cast for sign extension
+  auto imm_12 = static_cast<int32_t>(fields.raw_inst) >> 31;
 
-  fields.imm = (imm_12 << 12) | (imm_11 << 11) | (imm_10_5 << 5) | (imm_4_1) | 0b0;
+  fields.imm = (imm_12 << 12) | (imm_11 << 11) | (imm_10_5 << 5) | (imm_4_1 << 1) | 0b0;
 }
 
 void extract_U_type(DecodedInstruction& fields)
 {
   extract_rd(fields);
-  fields.imm = fields.raw_inst >> 12;
+  fields.imm = static_cast<int32_t>(fields.raw_inst) >> 12;
 }
 
 void extract_J_type(DecodedInstruction& fields)
