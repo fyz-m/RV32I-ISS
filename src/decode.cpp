@@ -4,7 +4,8 @@
 #include <iostream>
 
 
-void decode(DecodedInstruction &input_instruction) {
+void decode(DecodedInstruction &input_instruction) 
+{
   
   input_instruction.opcode = input_instruction.raw_inst & 0x0000007F;
   set_type(input_instruction);
@@ -45,88 +46,144 @@ void decode(DecodedInstruction &input_instruction) {
   }
 }
 
-
-void decode_R_type(DecodedInstruction& fields) {
+void decode_R_type(DecodedInstruction& fields) 
+{
   // extract fields
   extract_R_type(fields);
 
   // Set operation
-  switch (fields.funct3) {
-  case 0:
-    fields.Operation = (fields.funct7 == 0) ? OPERATION::ADD : OPERATION::SUB;
-    break;
+  switch (fields.funct3) 
+  {
+    case 0:
+      fields.Operation = (fields.funct7 == 0) ? OPERATION::ADD : OPERATION::SUB;
+      break;
+    case 1:
+      fields.Operation = OPERATION::SLL;
+      break;
+    case 2:
+      fields.Operation = OPERATION::SLT;
+      break;
+    case 3:
+      fields.Operation = OPERATION::SLTU;
+      break;
+    case 4:
+      fields.Operation = OPERATION::XOR;
+      break;
+    case 5:
+      fields.Operation = (fields.funct7 == 0) ? OPERATION::SRL : OPERATION::SRA; 
+      break;
+    case 6:
+      fields.Operation = OPERATION::OR;
+      break;
+    case 7:
+      fields.Operation = OPERATION::AND;
+      break;
   }
 }
 
-void decode_I_type(DecodedInstruction& fields) {
+void decode_I_type(DecodedInstruction& fields) 
+{
 
   extract_I_type(fields);
 
-  switch (fields.funct3) {
-  case 0:
-    fields.Operation = (fields.opcode == 19) ? OPERATION::ADDI : OPERATION::LB; 
-    break;   
-  case 1:
-  case 2:
-  case 3:
-  case 4:
-  case 5:
-  case 6:
-  case 7:
-    break;
+  switch (fields.funct3) 
+  {
+    case 0:
+      fields.Operation = (fields.opcode == 19) ? OPERATION::ADDI : OPERATION::LB; 
+      break;   
+    case 1:
+      fields.Operation = (fields.opcode == 19) ? OPERATION::SLLI : OPERATION::LH; 
+      break;
+    case 2:
+      fields.Operation = (fields.opcode == 19) ? OPERATION::SLTI : OPERATION::LW; 
+      break;
+    case 3:
+      fields.Operation =  OPERATION::SLTIU; 
+      break;
+    case 4:
+      fields.Operation = (fields.opcode == 19) ? OPERATION::XORI : OPERATION::LBU; 
+      break;
+    case 5:
+    {
+      if (fields.opcode == 3)
+      {
+        fields.Operation = OPERATION::LHU;
+        break;
+      }
+      // srli and srai have the same funct3 and opcode so are differentiated by imm[10] being set
+      // Only the first 5 bits of the immediate are used for shifting since shifting more than 32 bits is redudant (in RV32I)
+      fields.funct7 = fields.raw_inst >> 25;
+      fields.Operation = (fields.funct7 == 0) ? OPERATION::SRLI : OPERATION::SRAI;  
+      break;
+    }
+    case 6:
+      fields.Operation = OPERATION::ORI;
+      break;
+    case 7:
+      fields.Operation = OPERATION::ANDI;
+      break;
+    default:
+        fields.Operation = (fields.opcode == 103) ? OPERATION::JALR : OPERATION::UNKNOWN;
+      
   }
 }
 
-void decode_S_type(DecodedInstruction& fields) {
+void decode_S_type(DecodedInstruction& fields) 
+{
 
   extract_S_type(fields);
 
-  switch (fields.funct3) {
-  case 0:
-    fields.Operation = OPERATION::SB;
-    break;
-  case 1:
-    fields.Operation = OPERATION::SH;
-    break; 
-  case 2:
-    fields.Operation = OPERATION::SW;
-    break;
+  switch (fields.funct3) 
+  {
+    case 0:
+      fields.Operation = OPERATION::SB;
+      break;
+    case 1:
+      fields.Operation = OPERATION::SH;
+      break; 
+    case 2:
+      fields.Operation = OPERATION::SW;
+      break;
   }
 }
 
-void decode_B_type(DecodedInstruction& fields) {
+void decode_B_type(DecodedInstruction& fields) 
+{
 
   extract_B_type(fields);
 
-  switch (fields.funct3) {
-  case 0:
-    fields.Operation = OPERATION::BEQ; 
-    break;   
-  case 1:
-    fields.Operation = OPERATION::BNE; 
-    break;
-  case 4:
-    fields.Operation = OPERATION::BLT; 
-    break;
-  case 5:
-    fields.Operation = OPERATION::BGE; 
-    break;
-  case 6:
-    fields.Operation = OPERATION::BLTU; 
-    break;
-  case 7:
-    fields.Operation = OPERATION::BGEU; 
+  switch (fields.funct3) 
+  {
+    case 0:
+      fields.Operation = OPERATION::BEQ; 
+      break;   
+    case 1:
+      fields.Operation = OPERATION::BNE; 
+      break;
+    case 4:
+      fields.Operation = OPERATION::BLT; 
+      break;
+    case 5:
+      fields.Operation = OPERATION::BGE; 
+      break;
+    case 6:
+      fields.Operation = OPERATION::BLTU; 
+      break;
+    case 7:
+      fields.Operation = OPERATION::BGEU; 
   }
 }
 
-void decode_U_type(DecodedInstruction& fields) {
+void decode_U_type(DecodedInstruction& fields) 
+{
 
   extract_U_type(fields);
 
   fields.Operation = (fields.opcode == 55) ? OPERATION::LUI : OPERATION::AUIPC; 
 }
 
-void decode_J_type(DecodedInstruction& fields) {
+void decode_J_type(DecodedInstruction& fields) 
+{
 
   extract_J_type(fields);
 
@@ -215,27 +272,32 @@ void extract_J_type(DecodedInstruction& fields)
   fields.imm = (imm_20 << 20) | (imm_19_12 << 12) | (imm_11 << 11) | (imm_10_1 << 1) | 0b0;
 }
 
-void extract_rd(DecodedInstruction& fields) {
+void extract_rd(DecodedInstruction& fields) 
+{
   // Extract the destination register from an instruction
   fields.rd =  (fields.raw_inst >> 7) & 0x1F;
 }
 
-void extract_rs1(DecodedInstruction& fields) {
+void extract_rs1(DecodedInstruction& fields) 
+{
   // Extract the first source register from an instruction
   fields.rs1 = (fields.raw_inst >> 15) & 0x1F;
 }
 
-void extract_rs2(DecodedInstruction& fields) {
+void extract_rs2(DecodedInstruction& fields) 
+{
   // Extract the second source register from an instruction
   fields.rs2 = (fields.raw_inst >> 20) & 0x1F;
 }
 
-void extract_funct3(DecodedInstruction& fields) {
+void extract_funct3(DecodedInstruction& fields) 
+{
   // Extract the 3-bit function field from an instruction
   fields.funct3 = (fields.raw_inst >> 12) & 0x7;
 }
 
-void extract_funct7(DecodedInstruction& fields) {
+void extract_funct7(DecodedInstruction& fields) 
+{
   // Extract the 7-bit function field from an instruction
   fields.funct7 = fields.raw_inst >> 25;
 }
