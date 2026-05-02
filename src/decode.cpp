@@ -122,11 +122,15 @@ void decode_B_type(DecodedInstruction& fields) {
 void decode_U_type(DecodedInstruction& fields) {
 
   extract_U_type(fields);
+
+  fields.Operation = (fields.opcode == 55) ? OPERATION::LUI : OPERATION::AUIPC; 
 }
 
 void decode_J_type(DecodedInstruction& fields) {
 
   extract_J_type(fields);
+
+  fields.Operation =  (fields.opcode == 111) ? OPERATION::JAL : OPERATION::UNKNOWN; 
 }
 
 void extract_R_type(DecodedInstruction& fields)
@@ -194,28 +198,41 @@ void extract_U_type(DecodedInstruction& fields)
 
 void extract_J_type(DecodedInstruction& fields)
 {
-  // Same fields as U-type, immediate is encoded differently
   extract_rd(fields);
+
+  // imm[19:12]
+  auto imm_19_12 = (fields.raw_inst >> 12) & 0xFF;
+
+  // imm[11]
+  auto imm_11 = (fields.raw_inst >> 20) & 0x1;
+
+  // imm[10:1]
+  auto imm_10_1 = (fields.raw_inst >> 21) & 0x3FF;
+
+  // imm[20]
+  auto imm_20 = static_cast<int32_t>(fields.raw_inst) >> 31;
+
+  fields.imm = (imm_20 << 20) | (imm_19_12 << 12) | (imm_11 << 11) | (imm_10_1 << 1) | 0b0;
 }
 
 void extract_rd(DecodedInstruction& fields) {
   // Extract the destination register from an instruction
-  fields.rd =  (fields.raw_inst >> 7) & 0x000F;
+  fields.rd =  (fields.raw_inst >> 7) & 0x1F;
 }
 
 void extract_rs1(DecodedInstruction& fields) {
   // Extract the first source register from an instruction
-  fields.rs1 = (fields.raw_inst >> 15) & 0x0001F;
+  fields.rs1 = (fields.raw_inst >> 15) & 0x1F;
 }
 
 void extract_rs2(DecodedInstruction& fields) {
   // Extract the second source register from an instruction
-  fields.rs2 = (fields.raw_inst >> 20) & 0x01F;
+  fields.rs2 = (fields.raw_inst >> 20) & 0x1F;
 }
 
 void extract_funct3(DecodedInstruction& fields) {
   // Extract the 3-bit function field from an instruction
-  fields.funct3 = (fields.raw_inst >> 12) & 0x00007;
+  fields.funct3 = (fields.raw_inst >> 12) & 0x7;
 }
 
 void extract_funct7(DecodedInstruction& fields) {
