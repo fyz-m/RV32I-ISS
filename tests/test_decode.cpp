@@ -4,34 +4,6 @@
 #include "../src/headers/decode.hpp"
 
 
-
-
-// TEST(Decode_S_type_Test, registers) {
-//   // Check if immediate gets extracted and assembled properly
-
-//   DecodedInstruction fields {};
-
-//   fields.raw_inst = 0x19488823; // sb x20, 400(x17)
-//   decode(fields);
-
-//   EXPECT_EQ(fields.rs2, 20);
-//   EXPECT_EQ(fields.rs1, 17);
-
-// }
-
-// TEST(Decode_S_type_Test, IMM) {
-//   // Check if immediate gets extracted and assembled properly
-
-//   DecodedInstruction fields {};
-
-//   fields.raw_inst = 0x19488823; // sb x20, 400(x17)
-//   decode(fields);
-
-//   EXPECT_EQ(fields.imm, 400);
-
-// }
-
-
 struct RtypeCase {
     uint32_t instruction;
     uint8_t expected_rd, expected_rs1, expected_rs2;
@@ -108,3 +80,52 @@ INSTANTIATE_TEST_SUITE_P(I_TYPE_DECODE_TEST, ItypeTest,
       return info.param.test_name;
       }
 );
+
+struct StypeCase {
+    uint32_t instruction;
+    uint8_t expected_rs2; 
+    int32_t expected_imm;
+    uint8_t expected_rs1;
+    OPERATION expected_op;
+    std::string test_name; 
+};
+
+class StypeTest : public ::testing::TestWithParam<StypeCase> {};
+
+TEST_P(StypeTest, decode_S_type_instructions)
+{
+    StypeCase tc = GetParam();
+
+    DecodedInstruction fields;
+    fields.raw_inst = tc.instruction;
+
+    decode(fields);
+
+    EXPECT_EQ(fields.rs1, tc.expected_rs1);
+    EXPECT_EQ(fields.rs2, tc.expected_rs2);
+    EXPECT_EQ(fields.imm, tc.expected_imm) << "Incorrect immediate extraction (may not be properly sign extended)";
+    EXPECT_EQ(fields.Operation, tc.expected_op);
+}
+
+INSTANTIATE_TEST_SUITE_P(S_TYPE_DECODE_TEST, StypeTest,
+
+    ::testing::Values(
+      StypeCase {0x19488823, 20, 400, 17, OPERATION::SB, "sb_basic" }, // sb x20, 400(x17)
+      StypeCase {0x00a01023, 10, 0, 0, OPERATION::SH, "sh_basic" }, // sh x10, 0(x0)
+      StypeCase {0x7e09a623, 0, 2028, 19, OPERATION::SW, "sw_basic" }, // sw x0, 2028(x19)
+
+      StypeCase {0x80208023, 2, -2048, 1, OPERATION::SB, "sb_negative_imm" },  // sb x2, -2048(x1)
+      StypeCase {0xfdf09723, 31, -50, 1, OPERATION::SH, "sh_negative_imm" },  // sh x31, -50(x1)
+      StypeCase {0xfef6afa3, 15, -1, 13, OPERATION::SW, "sw_negative_imm" }   // sw x15, -1(x13)
+    ),
+
+    [](const ::testing::TestParamInfo<StypeCase>& info) {
+      return info.param.test_name;
+      }
+);
+
+
+
+
+
+  
