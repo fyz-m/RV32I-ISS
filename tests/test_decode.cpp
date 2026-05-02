@@ -124,6 +124,55 @@ INSTANTIATE_TEST_SUITE_P(S_TYPE_DECODE_TEST, StypeTest,
       }
 );
 
+struct BtypeCase {
+    uint32_t instruction;
+    uint8_t expected_rs1; 
+    uint8_t expected_rs2;
+    int32_t expected_imm;
+    OPERATION expected_op;
+    std::string test_name; 
+};
+
+class BtypeTest : public ::testing::TestWithParam<BtypeCase> {};
+
+TEST_P(BtypeTest, decode_B_type_instructions)
+{
+    BtypeCase tc = GetParam();
+
+    DecodedInstruction fields;
+    fields.raw_inst = tc.instruction;
+
+    decode(fields);
+
+    EXPECT_EQ(fields.rs1, tc.expected_rs1);
+    EXPECT_EQ(fields.rs2, tc.expected_rs2);
+    EXPECT_EQ(fields.imm, tc.expected_imm) << "Incorrect immediate extraction (may not be properly sign extended)";
+    EXPECT_EQ(fields.Operation, tc.expected_op);
+}
+
+INSTANTIATE_TEST_SUITE_P(B_TYPE_DECODE_TEST, BtypeTest,
+
+    ::testing::Values(
+      BtypeCase{0x014000e3, 0, 20, 2048, OPERATION::BEQ, "beq_basic"}, // beq x0, x20, 2048
+      BtypeCase{0x00109663, 1,1, 12, OPERATION::BNE, "bne_basic"}, // bne x1, x1, 12
+      BtypeCase{0x0010c663, 1,1, 12, OPERATION::BLT, "blt_basic"}, // blt x1, x1, 12
+      BtypeCase{0x0010d663, 1,1, 12, OPERATION::BGE, "bge_basic"}, // bge x1, x1, 12
+      BtypeCase{0x0010e663, 1,1, 12, OPERATION::BLTU, "bltu_basic"}, // bltu x1, x1, 12
+      BtypeCase{0x0010f663, 1,1, 12, OPERATION::BGEU, "bgeu_basic"}, // bgeu x1, x1, 12
+      
+      // Immediate tests 
+      BtypeCase{0xfe108ae3, 1,1, -12, OPERATION::BEQ, "imm_negative"}, // bge x1, x1, -12 
+      BtypeCase{0x00108263, 1, 1, 4, OPERATION::BEQ, "imm_min_positive"}, // beq x1, x1, 4
+      BtypeCase{0xfe108ee3, 1, 1, -4, OPERATION::BEQ, "imm_min_negative"}, // beq x1, x1, -4
+      BtypeCase{0x81400063, 0, 20, -4096, OPERATION::BEQ, "imm_min"}, // beq x0, x20, -4096
+      BtypeCase{0x7f400fe3, 0, 20, 4094, OPERATION::BEQ, "imm_max"} // beq x0, x20, 4094
+      
+    ),
+
+    [](const ::testing::TestParamInfo<BtypeCase>& info) {
+      return info.param.test_name;
+      }
+);
 
 
 
