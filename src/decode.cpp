@@ -156,7 +156,8 @@ void extract_S_type(DecodedInstruction& fields)
   auto imm_4_0 = (fields.raw_inst >> 7) & 0x1F;
 
   // Imm[11:5]
-  auto imm_11_5 = fields.raw_inst >> 24;
+  // Cast as signed so shift is arithmetic (sign extends)
+  auto imm_11_5 = static_cast<int32_t>(fields.raw_inst) >> 25;
   
   fields.imm = (imm_11_5 << 5) | (imm_4_0);
 }
