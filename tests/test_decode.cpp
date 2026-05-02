@@ -217,6 +217,48 @@ INSTANTIATE_TEST_SUITE_P(U_TYPE_DECODE_TEST, UtypeTest,
 );
 
 
+struct JtypeCase {
+    uint32_t instruction;
+    uint8_t expected_rd; 
+    int32_t expected_imm;
+    OPERATION expected_op;
+    std::string test_name; 
+};
+
+class JtypeTest : public ::testing::TestWithParam<JtypeCase> {};
+
+TEST_P(JtypeTest, decode_J_type_instructions)
+{
+    JtypeCase tc = GetParam();
+
+    DecodedInstruction fields;
+    fields.raw_inst = tc.instruction;
+
+    decode(fields);
+
+    EXPECT_EQ(fields.rd, tc.expected_rd);
+    EXPECT_EQ(fields.imm, tc.expected_imm) << "Incorrect immediate extraction (may not be properly sign extended)";
+    EXPECT_EQ(fields.Operation, tc.expected_op);
+}
+
+INSTANTIATE_TEST_SUITE_P(J_TYPE_DECODE_TEST, JtypeTest,
+
+    ::testing::Values(
+        JtypeCase{0x0c800a6f, 20, 200, OPERATION::JAL, "jal_basic"}, // jal x20, 200
+
+        // Immediate tests
+        JtypeCase{0xf39ffa6f, 20, -200, OPERATION::JAL, "jal_imm_negative"}, // jal x20, -200
+        JtypeCase{0x80000a6f, 20, -1048576, OPERATION::JAL, "jal_imm_negative_max"}, // jal x20, -1048576
+        JtypeCase{0xffdffa6f, 20, -4, OPERATION::JAL, "jal_imm_negative_min"}, // jal x20, -4
+        JtypeCase{0x00400a6f, 20, 4, OPERATION::JAL, "jal_imm_positive_min"}, // jal x20, 4
+        JtypeCase{0x7ffffa6f, 20, 1048574, OPERATION::JAL, "jal_imm_positive_max"} // jal x20, 1048574
+    ),
+
+    [](const ::testing::TestParamInfo<JtypeCase>& info) {
+      return info.param.test_name;
+      }
+);
+
 
 
   
