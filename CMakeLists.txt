@@ -34,7 +34,11 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 # ── Test executable ───────────────────────────────────────────────────────────
-add_executable(iss_tests tests/test_decode.cpp)
+add_executable(iss_tests 
+               tests/test_decode.cpp
+               tests/test_execute.cpp
+               )
+            
 target_link_libraries(iss_tests PRIVATE iss_core GTest::gtest_main)
 target_compile_options(iss_tests PRIVATE -fsanitize=address,undefined)
 target_link_options(iss_tests PRIVATE -fsanitize=address,undefined)
