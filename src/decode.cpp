@@ -111,7 +111,7 @@ void decode_I_type(DecodedInstruction& fields)
         break;
       }
       // srli and srai have the same funct3 and opcode so are differentiated by imm[10] being set
-      // Only the first 5 bits of the immediate are used for shifting since shifting more than 32 bits is redudant (in RV32I)
+      // Instruction[31:25] are redudant in shift instructions so is used as funct7
       fields.funct7 = fields.raw_inst >> 25;
       fields.Operation = (fields.funct7 == 0) ? OPERATION::SRLI : OPERATION::SRAI;  
       break;
@@ -126,6 +126,11 @@ void decode_I_type(DecodedInstruction& fields)
         fields.Operation = (fields.opcode == 103) ? OPERATION::JALR : OPERATION::UNKNOWN;
       
   }
+
+  if (fields.Operation == OPERATION::SRLI || fields.Operation == OPERATION::SRAI || fields.Operation == OPERATION::SLLI)
+    // Only first 5 bits of immediate are used for shift instruction 
+    // because register width = 32 so upper 7 bits of imm are redundant
+    fields.imm &= 0x1F;
 }
 
 void decode_S_type(DecodedInstruction& fields) 
