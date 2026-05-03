@@ -71,9 +71,16 @@ INSTANTIATE_TEST_SUITE_P(I_TYPE_DECODE_TEST, ItypeTest,
     ::testing::Values(
       ItypeCase {0x02810093, 1, 2, 40, OPERATION::ADDI, "addi_basic"},  // addi x1, x2, 40
       ItypeCase {0x00028503, 10, 5, 0 , OPERATION::LB, "lb_basic"}, // lb x10, 0(x5)
-      // Testing immediate sign ext
+      ItypeCase{0x001f1f93, 31, 30, 1, OPERATION::SLLI, "slli_basic"}, // slli x31, x30, 1
+      ItypeCase{0x01409093, 1, 1, 20, OPERATION::SLLI, "slli_basic_2"}, // slli x1, x1, 20
+      ItypeCase{0xff605003, 0, 0, -10, OPERATION::LHU, "lhu_basic"}, // lhu x0, -10(x0)
+      // Corner case: both srli and srai have the same opcode and funct3
+      ItypeCase{0x00abdc93, 25, 23, 10, OPERATION::SRLI, "srli_basic"}, // srli x25, x23, 10  
+      ItypeCase{0x4081d613, 12, 3, 8, OPERATION::SRAI, "srai_basic"}, // srai x12, x3, 8 
+      ItypeCase{0x4020d093, 1, 1, 2, OPERATION::SRAI, "srai_basic_2"}, // srai x1, x1, 2  
+      // Test immediate
       ItypeCase {0xfec10093, 1, 2, -20, OPERATION::ADDI, "sign_ext"},  // addi x1, x2, -20
-      ItypeCase {0xfff10093, 1, 2, -1, OPERATION::ADDI, "sign_ext_max"} // addi x1, x2, -1
+      ItypeCase {0xfff10093, 1, 2, -1, OPERATION::ADDI, "sign_ext_2"} // addi x1, x2, -1
     ),
 
     [](const ::testing::TestParamInfo<ItypeCase>& info) {
