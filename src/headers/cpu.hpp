@@ -4,22 +4,6 @@
 #include <memory>
 
 
-/*
-  A CPU CORE "has-a" register file, pc, decoding and execution units
-  TODO:
-
-  - Move decoding logic inside 
-    - Seperate decoder Class
-
-  - Move execution logic inside
-    - Seperate execution Class
-
-  - Move Step function inside ( fetch/decode/execute loop)
-
-  - Constructor functions takes as input parameters pointers to Memory objects (RAM + Instruction memory)
-  - Default constructor initializes its own memory
-    
-*/ 
 enum class OPERATION {
 
   UNKNOWN,
@@ -41,13 +25,14 @@ enum class TYPE { UNKNOWN, R_TYPE, I_TYPE, S_TYPE, B_TYPE, U_TYPE, J_TYPE };
 
 typedef struct  DecodedInstruction {
 
-  uint32_t raw_inst;
+  //uint32_t* raw_inst = nullptr;
+  uint32_t raw_inst {};
   uint8_t opcode{}, funct3{}, funct7{}, rs1{}, rs2{}, rd{};
   int32_t imm{};
   TYPE type = TYPE::UNKNOWN;
   OPERATION Operation = OPERATION::UNKNOWN;
 
-} Decoded_Instruction;
+} DecodedInstruction;
 
 
 
@@ -75,8 +60,11 @@ class CPU
 
   public:
 
-    CPU(int width = 32, std::shared_ptr<Memory> Instruction_Memory_ptr = nullptr, std::shared_ptr<Memory> Data_Memory_ptr = nullptr);
+    CPU(int width = 32, 
+        std::shared_ptr<Memory> Instruction_Memory_ptr = nullptr, 
+        std::shared_ptr<Memory> Data_Memory_ptr = nullptr);
     
+    friend class CPU_test;
     // Complete one instruction ( Fetch/decode/execute )
     void Step();
 
@@ -92,8 +80,6 @@ class CPU
     // Returns the current value of the program counter
     uint32_t readPC() const;
     
-  private:
-
     // Fetch instruction at address[PC] and write it to the instruction register
     void Fetch();
 
@@ -112,6 +98,8 @@ class CPU
     // Write to register[address]
     void writeReg(int address, int32_t data);
   
+  private:
+
     void execute_R_type();
 
     void execute_I_type();
@@ -127,5 +115,10 @@ class CPU
 
 
 
+// Expose instruction fields for testing
+class CPU_test : public CPU{
 
+  public:
+    using CPU::instruction_fields;
+};
 
