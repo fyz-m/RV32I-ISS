@@ -117,6 +117,18 @@
         result = rs1 - rs2;
         break;
       
+      case OPERATION::OR:
+        result = rs1 | rs2;
+        break;
+      
+      case OPERATION::XOR:
+        result = rs1 ^ rs2;
+        break;
+      
+      case OPERATION::AND:
+        result = rs1 & rs2;
+        break;
+
       case OPERATION::SLL:
       {
         // Shift left logical (fill leading bits with 0)
@@ -143,6 +155,24 @@
         auto shamt = static_cast<uint32_t>(rs2 & 0x1F);
         result = rs1 >> shamt;  
         break;  
+      }
+
+      case OPERATION::SLT:
+      {
+        if (rs1 < rs2)
+          result = 1;
+        else
+          result = 0;
+        break;
+      }
+
+      case OPERATION::SLTU:
+      {
+        if (static_cast<uint32_t>(rs1) < static_cast<uint32_t>(rs2))
+          result = 1;
+        else
+          result = 0;
+        break;
       }
 
       default: 
