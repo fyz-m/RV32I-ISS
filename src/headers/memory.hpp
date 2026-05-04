@@ -6,16 +6,20 @@
 constexpr int REGISTER_FILE_SIZE = 32;
 
 class RegisterFile {
-private:
-  std::array<uint32_t, REGISTER_FILE_SIZE> m_registers{};
-  int m_width;
-public:
 
-  RegisterFile(int width = 32);
+  private:
 
-  void Write(int address, int32_t data);
+    std::array<uint32_t, REGISTER_FILE_SIZE> registers{};
 
-  int32_t Read(int address) const;
+    int WIDTH;
+    
+  public:
+
+    RegisterFile(int width = 32);
+
+    void Write(int address, uint32_t data);
+
+    uint32_t Read(int address) const;
 };
 
 class Memory {
@@ -23,8 +27,10 @@ class Memory {
 private:
   // RISC-V uses byte-addressable memory, so memory must be an array of bytes
   std::vector<uint8_t> m_memory{};
-  int m_WORD_SIZE;
-  int m_INSTRUCTION_SIZE;
+
+  int WORD_SIZE;
+
+  int INSTRUCTION_SIZE;
 
 public:
 

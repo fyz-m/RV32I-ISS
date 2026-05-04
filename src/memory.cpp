@@ -7,21 +7,21 @@
 // TODO: add error checking for out of bounds index
 
   RegisterFile::RegisterFile(int width)
-      : m_width(width)
+      : WIDTH(width)
       {}
 
-  void RegisterFile::Write(int address, int32_t data) 
+  void RegisterFile::Write(int address, uint32_t data) 
   {
     // Register x0 is hardwired to 0 so writes to the first register are ignored
     if (address == 0)
       return;
 
-    m_registers[address] = data;
+    registers[address] = data;
   }
 
-  int32_t RegisterFile::Read(int address) const 
+  uint32_t RegisterFile::Read(int address) const 
   { 
-    return m_registers[address]; 
+    return registers[address]; 
   }
 
 
@@ -32,8 +32,8 @@
 // read/write half words (16 bits)
 
   Memory::Memory(int size, int word_size)
-      : m_WORD_SIZE{word_size},
-        m_INSTRUCTION_SIZE{word_size / 8} // number of bytes
+      : WORD_SIZE{word_size},
+        INSTRUCTION_SIZE{word_size / 8} // number of bytes
   {
     m_memory.reserve(size);
     m_memory.resize(1);
@@ -115,5 +115,5 @@
   int Memory::number_of_words() const 
   {
     // number of bits / word_size (bits per word)
-    return (std::ssize(m_memory) * 8) / m_WORD_SIZE;
+    return (std::ssize(m_memory) * 8) / WORD_SIZE;
   }
