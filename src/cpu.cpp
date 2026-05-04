@@ -116,7 +116,35 @@
       case OPERATION::SUB:
         result = rs1 - rs2;
         break;
-            
+      
+      case OPERATION::SLL:
+      {
+        // Shift left logical (fill leading bits with 0)
+        // Shift amount = first 5 bits of rs2 (unsigned since cannot shift by negative amount)
+        auto shamt = static_cast<uint32_t>(rs2 & 0x1F);
+        result = rs1 << shamt;
+        break;
+      }
+
+      case OPERATION::SRL:
+      {
+        // Shift right logical (fill leading bits with 0)
+        // Shift amount = first 5 bits of rs2 (unsigned) 
+        auto shamt = static_cast<uint32_t>(rs2 & 0x1F);
+        // Cast as unsigned because right shifitng signed values in c++ sign extends them (shifts arithmetically) 
+        result = static_cast<uint32_t>(rs1) >> shamt;  
+        break;  
+      }
+
+      case OPERATION::SRA:
+      {
+        // Shift right arithmetic (fill leading bits with 0)
+        // Shift amount = first 5 bits of rs2 (unsigned)
+        auto shamt = static_cast<uint32_t>(rs2 & 0x1F);
+        result = rs1 >> shamt;  
+        break;  
+      }
+
       default: 
         break; 
     }
