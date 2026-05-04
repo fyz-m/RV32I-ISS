@@ -62,7 +62,24 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       Rtype_Execute_Case{OPERATION::SRA, -8, 2, -2, "shift_right_arithmetic_negative"},
       Rtype_Execute_Case{OPERATION::SRA, -1, 3, -1, "shift_right_arithmetic_does_signext"},
       Rtype_Execute_Case{OPERATION::SRA, 2147483647, 0b11111, 0, "shift_right_arithmetic_max"},
-      Rtype_Execute_Case{OPERATION::SRA, -2147483648, 0b11111, -1, "shift_right_arithmetic_max_2"}
+      Rtype_Execute_Case{OPERATION::SRA, -2147483648, 0b11111, -1, "shift_right_arithmetic_max_2"},
+
+      Rtype_Execute_Case{OPERATION::SLT, 20, 30, 1, "set_less_than_basic" },
+      Rtype_Execute_Case{OPERATION::SLT, 1200, 500, 0, "set_less_than_basic_2"},
+      Rtype_Execute_Case{OPERATION::SLT, 1, 1, 0, "set_less_than_equal_values"},
+      Rtype_Execute_Case{OPERATION::SLT, -5, 0, 1, "set_less_than_negative_values"},
+      Rtype_Execute_Case{OPERATION::SLT, -700, -1000, 0, "set_less_than_negative_values_2"},
+
+      Rtype_Execute_Case{OPERATION::SLTU, 20, 30, 1, "set_less_than_u_basic" },
+      Rtype_Execute_Case{OPERATION::SLTU, 1200, 500, 0, "set_less_than_u_basic_2"},
+      Rtype_Execute_Case{OPERATION::SLTU, 1, 1, 0, "set_less_than_u_equal_values"},
+      Rtype_Execute_Case{OPERATION::SLTU, -1, 0, 0, "set_less_than_u_negative_values"},
+      Rtype_Execute_Case{OPERATION::SLTU, 0, -1, 1, "set_less_than_u_negative_values_2"},
+      Rtype_Execute_Case{OPERATION::SLTU, 0x7FFFFFFF, static_cast<int32_t>(0x80000000), 1, "set_less_than_u_compares_as_unsigned"},
+      Rtype_Execute_Case{OPERATION::SLTU, static_cast<int32_t>(0x80000000), static_cast<int32_t>(0x80000001), 1, "set_less_than_u_compares_as_unsigned_2"}
+      
+
+      
     ),
 
     [](const ::testing::TestParamInfo<Rtype_Execute_Case>& info) {
