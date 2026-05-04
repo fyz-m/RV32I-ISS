@@ -25,7 +25,9 @@ enum class TYPE { UNKNOWN, R_TYPE, I_TYPE, S_TYPE, B_TYPE, U_TYPE, J_TYPE };
 
 typedef struct  DecodedInstruction {
 
-  //uint32_t* raw_inst = nullptr;
+  // uint32_t* raw_inst = nullptr;  
+  // -- cpu.cpp needs to be updated to use raw_inst as a pointer to instruction register
+  // Current implementation is creating a copy every Fetch() call 
   uint32_t raw_inst {};
   uint8_t opcode{}, funct3{}, funct7{}, rs1{}, rs2{}, rd{};
   int32_t imm{};
@@ -75,7 +77,7 @@ class CPU
     std::shared_ptr<Memory> getDataMemory() const; 
 
     // Returns the value in the register[address]
-    int32_t readReg(int address) const;
+    uint32_t readReg(int address) const;
 
     // Returns the current value of the program counter
     uint32_t readPC() const;
@@ -96,7 +98,7 @@ class CPU
     void incrementPC();
     
     // Write to register[address]
-    void writeReg(int address, int32_t data);
+    void writeReg(int address, uint32_t data);
   
   private:
 

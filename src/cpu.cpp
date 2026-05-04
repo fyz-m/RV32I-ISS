@@ -4,8 +4,15 @@
 #include <cstdint>
 #include <memory>
 
-  CPU::CPU(int width, std::shared_ptr<Memory> Instruction_Memory_ptr, std::shared_ptr<Memory> Data_Memory_ptr) 
-    : instruction_register{}, instruction_fields{} , program_counter{},
+// TODO:
+// Change instruction_fields.raw_inst to be a pointer to the instruction register
+// To prevent unneccesary copying each time instruction is fetched
+
+  CPU::CPU(int width, 
+           std::shared_ptr<Memory> Instruction_Memory_ptr, 
+           std::shared_ptr<Memory> Data_Memory_ptr) 
+           
+    : instruction_register{}, instruction_fields{}, program_counter{},
       register_file(width), 
       Instruction_Memory(Instruction_Memory_ptr), 
       Data_Memory(Data_Memory_ptr)
@@ -80,12 +87,12 @@
     return program_counter; 
   }
 
-  void CPU::writeReg(int address, int32_t data) 
+  void CPU::writeReg(int address, uint32_t data) 
   {
     register_file.Write(address, data);
   }
 
-  int32_t CPU::readReg(int address) const 
+  uint32_t CPU::readReg(int address) const 
   { 
     return register_file.Read(address); 
   }
@@ -95,10 +102,10 @@
   {
     // All R-type instructions operate on two operands from the register file specified at location rs1 and rs2
     // result is written to register file at location rd
-    auto rs1 = (readReg(instruction_fields.rs1));
-    auto rs2 = (readReg(instruction_fields.rs2));
+    auto rs1 = static_cast<int32_t>((readReg(instruction_fields.rs1)));
+    auto rs2 = static_cast<int32_t>((readReg(instruction_fields.rs2)));
     auto &rd = instruction_fields.rd;
-    int32_t result {};
+    int32_t result {};   
 
     switch (instruction_fields.Operation) 
     {
