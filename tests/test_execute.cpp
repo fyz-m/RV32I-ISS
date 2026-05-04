@@ -47,6 +47,11 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       Rtype_Execute_Case{OPERATION::SUB, -300,  -700, 400, "sub_negative_numbers"},
       Rtype_Execute_Case{OPERATION::SUB,  2147483647, -1, -2147483648, "sub_positive_overflow"},
       Rtype_Execute_Case{OPERATION::SUB,  -2147483648, 1, 2147483647, "sub_negative_overflow"},
+
+      Rtype_Execute_Case{OPERATION::XOR, -1, -1, 0, "xor_case"},
+      Rtype_Execute_Case{OPERATION::OR, -1, -0, -1, "or_case"},
+      Rtype_Execute_Case{OPERATION::AND, -1, -1, -1, "and_case"},
+      Rtype_Execute_Case{OPERATION::AND, -1, 0, 0, "and_case_2"},
       
       Rtype_Execute_Case{OPERATION::SLL, 2, 2, 8, "shift_left_logical_basic"},
       Rtype_Execute_Case{OPERATION::SLL, 1, 1, 2, "shift_left_logical_fills_leading_bits_with_zero"},
@@ -77,9 +82,6 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       Rtype_Execute_Case{OPERATION::SLTU, 0, -1, 1, "set_less_than_u_negative_values_2"},
       Rtype_Execute_Case{OPERATION::SLTU, 0x7FFFFFFF, static_cast<int32_t>(0x80000000), 1, "set_less_than_u_compares_as_unsigned"},
       Rtype_Execute_Case{OPERATION::SLTU, static_cast<int32_t>(0x80000000), static_cast<int32_t>(0x80000001), 1, "set_less_than_u_compares_as_unsigned_2"}
-      
-
-      
     ),
 
     [](const ::testing::TestParamInfo<Rtype_Execute_Case>& info) {
