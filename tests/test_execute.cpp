@@ -88,3 +88,75 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       return info.param.test_name;
       }
 );
+
+TEST(Jtype_execute_test, test_JAL)
+{
+    int32_t jump_target_address{200};
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::J_TYPE;
+    cpu.instruction_fields.Operation = OPERATION::JAL;
+    cpu.instruction_fields.rd = 1;
+    cpu.instruction_fields.imm =  jump_target_address;
+
+    cpu.writePC(400);
+    cpu.Execute();
+
+    EXPECT_EQ(cpu.readReg(1), 404);
+    EXPECT_EQ(cpu.readPC(), 600);
+
+}
+
+TEST(Jtype_execute_test, test_JAL_2)
+{
+    int32_t jump_target_address{0xA67F8};
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::J_TYPE;
+    cpu.instruction_fields.Operation = OPERATION::JAL;
+    cpu.instruction_fields.rd = 1;
+    cpu.instruction_fields.imm =  jump_target_address;
+
+    cpu.writePC(0x0000540C);
+    cpu.Execute();
+
+    EXPECT_EQ(cpu.readReg(1), 0x00005410);
+    EXPECT_EQ(cpu.readPC(), 0x000ABC04);
+
+}
+
+TEST(Jtype_execute_test, test_JAL_max)
+{
+    int32_t jump_target_address{1048574};
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::J_TYPE;
+    cpu.instruction_fields.Operation = OPERATION::JAL;
+    cpu.instruction_fields.rd = 1;
+    cpu.instruction_fields.imm =  jump_target_address;
+
+    cpu.writePC(400);
+    cpu.Execute();
+
+    EXPECT_EQ(cpu.readReg(1), 404);
+    EXPECT_EQ(cpu.readPC(), 1048974);
+
+}
+
+TEST(Jtype_execute_test, test_JAL_negative_max)
+{
+    int32_t jump_target_address{-1048576};
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::J_TYPE;
+    cpu.instruction_fields.Operation = OPERATION::JAL;
+    cpu.instruction_fields.rd = 1;
+    cpu.instruction_fields.imm =  jump_target_address;
+
+    cpu.writePC(0xFFFFFFFA);
+    cpu.Execute();
+
+    EXPECT_EQ(cpu.readReg(1), 0xFFFFFFFE);
+    EXPECT_EQ(cpu.readPC(), static_cast<uint32_t>(4293918714));
+
+}
