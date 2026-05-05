@@ -203,6 +203,85 @@ INSTANTIATE_TEST_SUITE_P(U_TYPE, Utype_Execute_Test,
       }
 );
 
+struct Btype_Execute_Case {
+    OPERATION operation;
+    int32_t rs1_value;
+    int32_t rs2_value;
+    int32_t imm; 
+    uint32_t pc; 
+    uint32_t pc_expected;
+    std::string test_name;
+    
+};
+
+class Btype_Execute_Test : public ::testing::TestWithParam<Btype_Execute_Case> {};
+
+TEST_P(Btype_Execute_Test, executes)
+{
+    Btype_Execute_Case tc = GetParam();
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::B_TYPE;
+    cpu.instruction_fields.Operation = tc.operation;
+    cpu.instruction_fields.rs1 = 1;
+    cpu.instruction_fields.rs2 = 2;
+    cpu.instruction_fields.imm = tc.imm;
+
+    cpu.writePC(tc.pc);
+    cpu.writeReg(1, tc.rs1_value); 
+    cpu.writeReg(2, tc.rs2_value); 
+
+    cpu.Execute();
+
+    EXPECT_EQ(cpu.readPC(), tc.pc_expected) << "Program counter mismatch";
+    
+}
+
+INSTANTIATE_TEST_SUITE_P(B_TYPE, Btype_Execute_Test,
+
+    ::testing::Values(
+
+        Btype_Execute_Case{OPERATION::BEQ, 5, 5, 8, 0, 8, "beq_taken"},
+        Btype_Execute_Case{OPERATION::BEQ, 5, 10, 16, 0, 4, "beq_not_taken"},
+        Btype_Execute_Case{OPERATION::BEQ, -5000, -5000, -4, 16, 12, "beq_taken_negative"},
+        Btype_Execute_Case{OPERATION::BEQ, -700, -50, -4, 16, 20, "beq_not_taken_negative"},
+        
+        Btype_Execute_Case{OPERATION::BNE, 5, 7, 16, 0, 16, "BNE_taken"},
+        Btype_Execute_Case{OPERATION::BNE, 100, 100, 16, 0, 4, "BNE_not_taken"},
+        Btype_Execute_Case{OPERATION::BNE, -5000, -5001, -4, 16, 12, "BNE_taken_negative"},
+        Btype_Execute_Case{OPERATION::BNE, -50, -50, -4, 16, 20, "BNE_not_taken_negative"},
+
+        Btype_Execute_Case{OPERATION::BLT, 5, 7, 16, 0, 16, "BLT_taken"},
+        Btype_Execute_Case{OPERATION::BLT, 100, 100, 16, 0, 4, "BLT_not_taken"},
+        Btype_Execute_Case{OPERATION::BLT, 1000, 100, 16, 0, 4, "BLT_not_taken_2"},
+        Btype_Execute_Case{OPERATION::BLT, -20000, -19000, -400, 400, 0, "BLT_taken_negative"},
+        Btype_Execute_Case{OPERATION::BLT, -20000, -20000, -400, 400, 404, "BLT_not_taken_negative"},
+        Btype_Execute_Case{OPERATION::BLT, -20000, -22000, -400, 400, 404, "BLT_not_taken_negative_2"},
+        Btype_Execute_Case{OPERATION::BLT, 0x7FFFFFFF, static_cast<int32_t>(0xFFFFFFFF), 200, 1000, 1004, "blt_is_signed"},
+
+        Btype_Execute_Case{OPERATION::BGE, 5, -7, 16, 0, 16, "BGE_taken"},
+        Btype_Execute_Case{OPERATION::BGE, 100, 100, 16, 0, 16, "BGE_taken_2"},
+        Btype_Execute_Case{OPERATION::BGE, 99, 100, 16, 0, 4, "BGE_not_taken"},
+        Btype_Execute_Case{OPERATION::BGE, -20000, -19000, -400, 400, 404, "BGE__not_taken_negative"},
+        Btype_Execute_Case{OPERATION::BGE, -20000, -20000, -400, 400, 0, "BGE_taken_negative"},
+        Btype_Execute_Case{OPERATION::BGE, -20000, -22000, -400, 400, 0, "BGE_taken_negative_2"},
+        Btype_Execute_Case{OPERATION::BGE, 0x7FFFFFFF, static_cast<int32_t>(0xFFFFFFFF), -200, 1000, 800, "bge_is_signed"},
+
+        Btype_Execute_Case{OPERATION::BLTU, 5, 7, 16, 0, 16, "BLTU_taken"},
+        Btype_Execute_Case{OPERATION::BLTU, 100, 100, 16, 0, 4, "BLTU_not_taken"},
+        Btype_Execute_Case{OPERATION::BLTU, 1000, 100, 16, 0, 4, "BLTU_not_taken_2"},
+        Btype_Execute_Case{OPERATION::BLTU, 0x7FFFFFFF, static_cast<int32_t>(0xFFFFFFFF), 200, 1000, 1200, "bltu_is_unsigned"},
+
+        Btype_Execute_Case{OPERATION::BGEU, 7000, 7, 16, 0, 16, "BGEU_taken"},
+        Btype_Execute_Case{OPERATION::BGEU, 100, 100, 16, 0, 16, "BGEU_taken_2"},
+        Btype_Execute_Case{OPERATION::BGEU, 99, 100, 16, 0, 4, "BGEU_not_taken"},
+        Btype_Execute_Case{OPERATION::BGEU, 0x7FFFFFFF, static_cast<int32_t>(0xFFFFFFFF), -200, 8, 12, "bgeu_is_unsigned"}
+    ),
+    
+    [](const ::testing::TestParamInfo<Btype_Execute_Case>& info) {
+      return info.param.test_name;
+      }
+);
 
 TEST(Jtype_execute_test, test_JAL)
 {
