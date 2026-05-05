@@ -5,11 +5,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ── Core library (shared between sim and tests) ──────────────────────────────
+# CPU core library
 add_library(iss_core
     src/cpu.cpp
     src/memory.cpp
     src/decode.cpp
+    src/execute.cpp
 )
 target_include_directories(iss_core PUBLIC headers)
 target_compile_options(iss_core PRIVATE
@@ -41,7 +42,9 @@ add_library(iss_core_test
     src/cpu.cpp
     src/memory.cpp
     src/decode.cpp
+    src/execute.cpp
 )
+
 target_include_directories(iss_core_test PUBLIC headers)
 target_compile_options(iss_core_test PRIVATE
     -Wall -Wextra -Wpedantic -Werror  -g3 -O0
