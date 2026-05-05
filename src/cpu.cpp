@@ -189,27 +189,112 @@
     // All I-type instructions operate on immediate and an operand specified at location rs1 of registerfile
     //   - Except load instructions
     // result is written to register file at location rd
-    auto rs1 = (readReg(instruction_fields.rs1));
+    auto rs1 = static_cast<int32_t>(readReg(instruction_fields.rs1));
     auto &imm = instruction_fields.imm;
+    auto &rd = instruction_fields.rd;
     int32_t result {};
       
     switch (instruction_fields.Operation) 
     {
+      
+      case OPERATION::LB:
+        // Cast as signed so it gets sign extended 
+        result = static_cast<int8_t>(Data_Memory->Read_Byte(imm + rs1));
+        break;
+
+      case OPERATION::LH:
+        result = static_cast<int16_t>(Data_Memory->Read_halfWord(imm + rs1));
+        break;
+
+      case OPERATION::LW:
+        result = Data_Memory->Read_Word(imm + rs1);
+        break;
+
+      case OPERATION::LBU:
+        result = Data_Memory->Read_Byte(imm + rs1);
+        break;
+
+      case OPERATION::LHU:
+        result = Data_Memory->Read_halfWord(imm + rs1);
+        break;
+
+      
       case OPERATION::ADDI:
         result = rs1 + imm;
         break;
-
-      case OPERATION::LB:
-        result = Data_Memory->Read_Byte(imm + rs1);
+      
+      case OPERATION::ORI:
+        result = rs1 | imm;
         break;
-            
+
+      case OPERATION::XORI:
+        result = rs1 ^ imm;
+        break;
+
+      case OPERATION::ANDI:
+        result = rs1 & imm;
+        break;
+
+      case OPERATION::SLLI:
+      {
+        // Shift left logical (fill leading bits with 0)
+        // Shift amount = first 5 bits of imm (unsigned since cannot shift by negative amount)
+        auto shamt = static_cast<uint32_t>(imm & 0x1F);
+        result = rs1 << shamt;
+        break;
+      }
+
+      case OPERATION::SRLI:
+      {
+        // Shift right logical (fill leading bits with 0)
+        // Shift amount = first 5 bits of imm (unsigned) 
+        auto shamt = static_cast<uint32_t>(imm & 0x1F);
+        // Cast as unsigned because right shifitng signed values in c++ sign extends them (shifts arithmetically) 
+        result = static_cast<uint32_t>(rs1) >> shamt;  
+        break;  
+      }
+
+      case OPERATION::SRAI:
+      {
+        // Shift right arithmetic (fill leading bits with 0)
+        // Shift amount = first 5 bits of imm (unsigned)
+        auto shamt = static_cast<uint32_t>(imm & 0x1F);
+        result = rs1 >> shamt;  
+        break;  
+      }
+
+      case OPERATION::SLTI:
+      {
+        if (rs1 < imm)
+          result = 1;
+        else
+          result = 0;
+        break;
+      }
+
+      case OPERATION::SLTIU:
+      {
+        if (static_cast<uint32_t>(rs1) < static_cast<uint32_t>(imm))
+          result = 1;
+        else
+          result = 0;
+        break;
+      }
+
+      case OPERATION::JALR:
+      {
+        result = readPC() + 4;
+        writePC(rs1 + imm);
+        break;
+      }
+
       default: 
         break; 
 
     }
 
     // Write result back to register rd
-    writeReg(instruction_fields.rd, result);
+    writeReg(rd, result);
     // Increment PC to next instruction
     incrementPC();
     return;
