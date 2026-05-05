@@ -80,7 +80,9 @@ INSTANTIATE_TEST_SUITE_P(I_TYPE, ItypeTest,
       Itype_Decode_Case{0x4020d093, 1, 1, 2, OPERATION::SRAI, "srai_basic_2"}, // srai x1, x1, 2  
       // Test immediate
       Itype_Decode_Case {0xfec10093, 1, 2, -20, OPERATION::ADDI, "sign_ext"},  // addi x1, x2, -20
-      Itype_Decode_Case {0xfff10093, 1, 2, -1, OPERATION::ADDI, "sign_ext_2"} // addi x1, x2, -1
+      Itype_Decode_Case {0xfff10093, 1, 2, -1, OPERATION::ADDI, "sign_ext_2"}, // addi x1, x2, -1
+      Itype_Decode_Case{0x7ff08093, 1, 1, 2047, OPERATION::ADDI, "I_type_max_imm"}, // addi x1, x1, 2047
+      Itype_Decode_Case{0x80008093, 1, 1, -2048, OPERATION::ADDI, "I_type_min_imm"} // addi x1, x1, -2048
     ),
 
     [](const ::testing::TestParamInfo<Itype_Decode_Case>& info) {
@@ -123,7 +125,11 @@ INSTANTIATE_TEST_SUITE_P(S_TYPE, StypeTest,
 
       Stype_Decode_Case {0x80208023, 2, -2048, 1, OPERATION::SB, "sb_negative_imm" },  // sb x2, -2048(x1)
       Stype_Decode_Case {0xfdf09723, 31, -50, 1, OPERATION::SH, "sh_negative_imm" },  // sh x31, -50(x1)
-      Stype_Decode_Case {0xfef6afa3, 15, -1, 13, OPERATION::SW, "sw_negative_imm" }   // sw x15, -1(x13)
+      Stype_Decode_Case {0xfef6afa3, 15, -1, 13, OPERATION::SW, "sw_negative_imm" },   // sw x15, -1(x13)
+
+      Stype_Decode_Case{0x7e10afa3, 1, 2047, 1, OPERATION::SW, "Stype_max_imm"}, // sw x1, 2047(x1)
+      Stype_Decode_Case{0x8010a023, 1, -2048, 1, OPERATION::SW, "Stype_min_imm"} // sw x1, -2048(x1) 
+ 
     ),
 
     [](const ::testing::TestParamInfo<Stype_Decode_Case>& info) {
