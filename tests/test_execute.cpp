@@ -89,6 +89,54 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       }
 );
 
+
+struct Utype_Execute_Case {
+    OPERATION operation;
+    int32_t imm;
+    int32_t expected_rd_value; // expected value
+    std::string test_name;
+    uint32_t PC = 0;
+};
+
+class Utype_Execute_Test : public ::testing::TestWithParam<Utype_Execute_Case> {};
+
+TEST_P(Utype_Execute_Test, executes)
+{
+    Utype_Execute_Case tc = GetParam();
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::U_TYPE;
+    cpu.instruction_fields.Operation = tc.operation;
+    cpu.instruction_fields.rd = 1;
+    cpu.instruction_fields.imm = tc.imm;
+    cpu.writePC(tc.PC);
+
+    cpu.writeReg(1, 0xFFF); 
+
+    cpu.Execute();
+
+    
+    auto rd = static_cast<int32_t>(cpu.readReg(1));
+    EXPECT_EQ(rd, tc.expected_rd_value);
+
+}
+
+INSTANTIATE_TEST_SUITE_P(U_TYPE, Utype_Execute_Test,
+
+    ::testing::Values(
+
+      Utype_Execute_Case{OPERATION::LUI, 0x8CDEF, static_cast<int32_t>(0x8CDEF000), "lui_basic"},
+      Utype_Execute_Case{OPERATION::LUI, 0xFFFFF, static_cast<int32_t>(0xFFFFF000), "lui_max"},
+
+      Utype_Execute_Case{OPERATION::AUIPC, 0xABCDE, static_cast<int32_t>(0xABCDE001), "auipc_basic", 0x001},
+      Utype_Execute_Case{OPERATION::AUIPC, 0xFFFFF, static_cast<int32_t>(0xFFFFFFFF), "auipc_max", 0xFFF}
+    ),
+
+    [](const ::testing::TestParamInfo<Utype_Execute_Case>& info) {
+      return info.param.test_name;
+      }
+);
+
 TEST(Jtype_execute_test, test_JAL)
 {
     int32_t jump_target_address{200};
