@@ -91,6 +91,125 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       }
 );
 
+struct Itype_Execute_Case {
+    OPERATION operation;
+    int32_t rs1_value; // value of operand 1
+    int32_t imm; // value of immediate
+    int32_t expected_rd_value; // expected value
+    std::string test_name;
+};
+
+class Itype_Execute_Test : public ::testing::TestWithParam<Itype_Execute_Case> {};
+
+TEST_P(Itype_Execute_Test, executes)
+{
+    Itype_Execute_Case tc = GetParam();
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::I_TYPE;
+    cpu.instruction_fields.Operation = tc.operation;
+    cpu.instruction_fields.rs1 = 1;
+    cpu.instruction_fields.imm = tc.imm;
+    cpu.instruction_fields.rd = 3;
+
+    cpu.writeReg(1, tc.rs1_value);
+
+    cpu.Execute();
+    auto rd = static_cast<int32_t>(cpu.readReg(3));
+    EXPECT_EQ(rd, tc.expected_rd_value);
+
+}
+
+INSTANTIATE_TEST_SUITE_P(I_TYPE, Itype_Execute_Test,
+
+    ::testing::Values(
+      Itype_Execute_Case{OPERATION::ADDI, 25,  25, 50, "addi_basic"},
+      Itype_Execute_Case{OPERATION::ADDI, 0,  -1, -1, "addi_negative_number"},
+      Itype_Execute_Case{OPERATION::ADDI, -300,  -700, -1000, "addi_negative_numbers"},
+      Itype_Execute_Case{OPERATION::ADDI,  2147483647, 1, -2147483648, "addi_positive_overflow"},
+      Itype_Execute_Case{OPERATION::ADDI,  -2147483648, -1, 2147483647, "addi_negative_overflow"},
+
+      Itype_Execute_Case{OPERATION::XORI, -1, -1, 0, "xori_case"},
+      Itype_Execute_Case{OPERATION::ORI, -1, -0, -1, "ori_case"},
+      Itype_Execute_Case{OPERATION::ANDI, -1, -1, -1, "andi_case"},
+      Itype_Execute_Case{OPERATION::ANDI, -1, 0, 0, "andi_case_2"},
+      
+      Itype_Execute_Case{OPERATION::SLLI, 2, 2, 8, "shift_left_logical_imm_basic"},
+      Itype_Execute_Case{OPERATION::SLLI, 1, 1, 2, "shift_left_logical_imm_fills_leading_bits_with_zero"},
+      Itype_Execute_Case{OPERATION::SLLI, 2147483647, 0b11111, -2147483648, "shift_left_logical_imm_max"},
+      Itype_Execute_Case{OPERATION::SLLI, 1, 0b11111, -2147483648, "shift_left_logical_imm_max_2"},
+
+      Itype_Execute_Case{OPERATION::SRLI, 8, 2, 2, "shift_right_logical_imm_basic"},
+      Itype_Execute_Case{OPERATION::SRLI, -1, 1, 0x7FFFFFFF, "shift_right_logical_imm_does_not_signext"},
+      Itype_Execute_Case{OPERATION::SRLI, 2147483647, 0b11111, 0, "shift_right_logical_imm_max"},
+      Itype_Execute_Case{OPERATION::SRLI, -2147483648, 0b11111, 1, "shift_right_logical_imm_max_2"},
+
+      Itype_Execute_Case{OPERATION::SRAI, 8, 2, 2, "shift_right_arithmetic_imm_basic"},
+      Itype_Execute_Case{OPERATION::SRAI, -8, 2, -2, "shift_right_arithmetic_imm_negative"},
+      Itype_Execute_Case{OPERATION::SRAI, -1, 3, -1, "shift_right_arithmetic_imm_does_signext"},
+      Itype_Execute_Case{OPERATION::SRAI, 2147483647, 0b11111, 0, "shift_right_arithmetic_imm_max"},
+      Itype_Execute_Case{OPERATION::SRAI, -2147483648, 0b11111, -1, "shift_right_arithmetic_imm_max_2"},
+
+      Itype_Execute_Case{OPERATION::SLTI, 20, 30, 1, "set_less_than_imm_basic" },
+      Itype_Execute_Case{OPERATION::SLTI, 1200, 500, 0, "set_less_than_imm_basic_2"},
+      Itype_Execute_Case{OPERATION::SLTI, 1, 1, 0, "set_less_than_imm_equal_values"},
+      Itype_Execute_Case{OPERATION::SLTI, -5, 0, 1, "set_less_than_imm_negative_values"},
+      Itype_Execute_Case{OPERATION::SLTI, -700, -1000, 0, "set_less_than_imm_negative_values_2"},
+
+      Itype_Execute_Case{OPERATION::SLTIU, 20, 30, 1, "set_less_than_imm_u_basic" },
+      Itype_Execute_Case{OPERATION::SLTIU, 1200, 500, 0, "set_less_than_imm_u_basic_2"},
+      Itype_Execute_Case{OPERATION::SLTIU, 1, 1, 0, "set_less_than_imm_u_equal_values"},
+      Itype_Execute_Case{OPERATION::SLTIU, -1, 0, 0, "set_less_than_imm_u_negative_values"},
+      Itype_Execute_Case{OPERATION::SLTIU, 0, -1, 1, "set_less_than_imm_u_negative_values_2"},
+      Itype_Execute_Case{OPERATION::SLTIU, 0x7FFFFFFF, -1, 1, "set_less_than_imm_u_compares_as_unsigned"}
+
+    ),
+
+    [](const ::testing::TestParamInfo<Itype_Execute_Case>& info) {
+      return info.param.test_name;
+      }
+);
+
+struct Itype_Execute_Load_Case {
+    OPERATION operation;
+    int32_t rs1_value; // value of operand 1
+    int32_t imm; // value of immediate
+    int32_t expected_rd_value; // expected value
+    std::string test_name;
+};
+
+class Itype_Execute_Load_Test : public ::testing::TestWithParam<Itype_Execute_Load_Case> {};
+
+TEST_P(Itype_Execute_Load_Test, executes)
+{
+    Itype_Execute_Load_Case tc = GetParam();
+
+    CPU_test cpu;
+    cpu.instruction_fields.type = TYPE::I_TYPE;
+    cpu.instruction_fields.Operation = tc.operation;
+    cpu.instruction_fields.rs1 = 1;
+    cpu.instruction_fields.imm = tc.imm;
+    cpu.instruction_fields.rd = 3;
+
+    cpu.writeReg(1, tc.rs1_value);
+
+    cpu.Execute();
+    auto rd = static_cast<int32_t>(cpu.readReg(3));
+    EXPECT_EQ(rd, tc.expected_rd_value);
+
+}
+
+INSTANTIATE_TEST_SUITE_P(I_TYPE_LOAD, Itype_Execute_Test,
+
+    ::testing::Values(
+    
+    ),
+
+    [](const ::testing::TestParamInfo<Itype_Execute_Case>& info) {
+      return info.param.test_name;
+      }
+);
+
 struct Stype_Execute_Case {
     OPERATION operation;
     uint32_t base_address {};
