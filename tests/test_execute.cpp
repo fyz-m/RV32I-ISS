@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include <cstdint>
+#include <memory>
+#include <sys/socket.h>
 #include "../src/headers/cpu.hpp"
 
 
@@ -89,6 +91,70 @@ INSTANTIATE_TEST_SUITE_P(R_TYPE, Rtype_Execute_Test,
       }
 );
 
+struct Stype_Execute_Case {
+    OPERATION operation;
+    uint32_t base_address {};
+    int32_t offset {};
+    uint32_t address_exp;
+    int32_t rs2 {}; // value in rs2 to store
+    std::string test_name;    
+};
+
+class Stype_Execute_Test : public ::testing::TestWithParam<Stype_Execute_Case> {};
+
+TEST_P(Stype_Execute_Test, executes)
+{
+   std::shared_ptr <Memory> data_memory_ptr = std::make_shared <Memory>();
+   CPU_test cpu(32, nullptr, data_memory_ptr);
+   Stype_Execute_Case tc = GetParam();
+   
+   cpu.instruction_fields.type = TYPE::S_TYPE;
+   cpu.instruction_fields.Operation = tc.operation;
+   cpu.instruction_fields.imm = tc.offset;
+   cpu.instruction_fields.rs1 = 1;
+   cpu.instruction_fields.rs2 = 2;
+
+   cpu.writeReg(2, tc.rs2);
+   cpu.writeReg(1, tc.base_address);
+   cpu.Execute();
+
+   auto address = tc.address_exp;
+   
+   if (tc.operation == OPERATION::SW)
+    EXPECT_EQ(static_cast<int32_t>(data_memory_ptr->Read_Word(address)), tc.rs2);
+
+   else if (tc.operation == OPERATION::SH)
+    EXPECT_EQ(static_cast<int32_t>(data_memory_ptr->Read_halfWord(address)), (tc.rs2 & 0xFFFF));
+
+   else if (tc.operation == OPERATION::SB)
+    EXPECT_EQ(static_cast<int32_t>(data_memory_ptr->Read_Byte(address)), (tc.rs2 & 0xFF));
+    
+}
+
+INSTANTIATE_TEST_SUITE_P(S_TYPE, Stype_Execute_Test,
+
+    ::testing::Values(
+        Stype_Execute_Case{OPERATION::SW, 0, 0, 0, 0xABCDEF, "sw_basic"},
+        Stype_Execute_Case{OPERATION::SH, 0, 0, 0, 0xABCDEF, "sh_basic"},
+        Stype_Execute_Case{OPERATION::SB, 0, 0, 0, 0xABCDEF, "sb_basic"},
+
+        Stype_Execute_Case{OPERATION::SW, 60, 40,100, 0xABCDEF, "sw_basic_2"},
+        Stype_Execute_Case{OPERATION::SH, 500, 400,900, 0xABCDEF, "sh_basic_2"},
+        Stype_Execute_Case{OPERATION::SB, 1200, 40, 1240, 0xABCDEF, "sb_basic_2"},
+
+        Stype_Execute_Case{OPERATION::SW, 6000, -700,5300, static_cast<int32_t>(0xFFFFFFFF), "sw_negative_offset"},
+        Stype_Execute_Case{OPERATION::SH, 500, -400,100, 0xF, "sh_negative_offset"},
+        Stype_Execute_Case{OPERATION::SB, 1200, -1, 1199, 0xABCDEF, "sb_negative_offset"},
+
+        Stype_Execute_Case{OPERATION::SW, 0, 0x7FF, 0x7FF, 0xABCDEF, "max_positive_offset"},
+        Stype_Execute_Case{OPERATION::SW, 4000, -2048, 1952, 0xABCDEF, "max_negative_offset"}
+        
+    ),
+
+    [](const ::testing::TestParamInfo<Stype_Execute_Case>& info) {
+      return info.param.test_name;
+      }
+);
 
 struct Utype_Execute_Case {
     OPERATION operation;
@@ -136,6 +202,7 @@ INSTANTIATE_TEST_SUITE_P(U_TYPE, Utype_Execute_Test,
       return info.param.test_name;
       }
 );
+
 
 TEST(Jtype_execute_test, test_JAL)
 {
