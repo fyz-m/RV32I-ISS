@@ -181,6 +181,7 @@
 
     // Write result back to register rd
     writeReg(rd, result);
+    incrementPC();
   }
 
   void CPU::execute_I_type()
@@ -209,6 +210,8 @@
 
     // Write result back to register rd
     writeReg(instruction_fields.rd, result);
+    // Increment PC to next instruction
+    incrementPC();
     return;
   }
 
@@ -224,26 +227,86 @@
       case OPERATION::SB:
         // Store first 2 bytes of rs2
         Data_Memory->Write(static_cast<uint8_t>(rs2), address);
-        return;
+        break;
 
       case OPERATION::SH:
         // Store first 4 bytes of rs2
         Data_Memory->Write(static_cast<uint16_t>(rs2), address);
-        return;
+        break;
 
       case OPERATION::SW:
         // Store rs2
         Data_Memory->Write(rs2, address);
-        return;
+        break;
 
        default: 
-         return; 
-    }      
+        break; 
+    } 
+
+    incrementPC();     
   }
 
   void CPU::execute_B_type()
   {
+    auto rs1 = static_cast<int32_t>(readReg(instruction_fields.rs1));
+    auto rs2 = static_cast<int32_t>(readReg(instruction_fields.rs2));
+    auto branch_target_address = instruction_fields.imm + static_cast<int32_t>(readPC());
 
+    switch (instruction_fields.Operation) 
+    {
+      case OPERATION::BEQ:
+        if (rs1 == rs2)
+        {
+          writePC(branch_target_address);
+          return;
+        }
+        break;
+
+      case OPERATION::BNE:
+        if (rs1 != rs2)
+        {
+          writePC(branch_target_address);
+          return;
+        }
+        break;
+      
+      case OPERATION::BLT:
+        if (rs1 < rs2)
+        {
+          writePC(branch_target_address);
+          return;
+        }
+        break;
+
+      case OPERATION::BGE:
+        if (rs1 >= rs2)
+        {
+          writePC(branch_target_address);
+          return;
+        }
+        break;
+
+      case OPERATION::BLTU:  
+        if (static_cast<uint32_t>(rs1) < static_cast<uint32_t>(rs2))
+        {
+          writePC(branch_target_address);
+          return;
+        }
+        break;
+      
+      case OPERATION::BGEU:
+        if (static_cast<uint32_t>(rs1) >= static_cast<uint32_t>(rs2))
+        {
+          writePC(branch_target_address);
+          return;
+        }
+        break;
+      
+      default:
+        break;
+    }
+    // If branch not taken, pc += 4
+    incrementPC();
   }
 
   void CPU::execute_U_type()
@@ -279,4 +342,4 @@
       // Jump to specified instruction
       writePC(instruction_fields.imm + static_cast<int32_t>(readPC()));
     }
-}
+  }
