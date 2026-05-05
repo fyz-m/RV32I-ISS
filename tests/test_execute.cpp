@@ -172,9 +172,8 @@ INSTANTIATE_TEST_SUITE_P(I_TYPE, Itype_Execute_Test,
 
 struct Itype_Execute_Load_Case {
     OPERATION operation;
-    int32_t rs1_value; // value of operand 1
-    int32_t imm; // value of immediate
-    int32_t expected_rd_value; // expected value
+    int32_t data_in_mem;
+    int32_t expected_rd_value; 
     std::string test_name;
 };
 
@@ -182,30 +181,48 @@ class Itype_Execute_Load_Test : public ::testing::TestWithParam<Itype_Execute_Lo
 
 TEST_P(Itype_Execute_Load_Test, executes)
 {
+    auto data_mem = std::make_shared<Memory>();
+
     Itype_Execute_Load_Case tc = GetParam();
 
-    CPU_test cpu;
+    CPU_test cpu(32, nullptr, data_mem);
+
     cpu.instruction_fields.type = TYPE::I_TYPE;
     cpu.instruction_fields.Operation = tc.operation;
     cpu.instruction_fields.rs1 = 1;
-    cpu.instruction_fields.imm = tc.imm;
+    cpu.instruction_fields.imm = 0;
     cpu.instruction_fields.rd = 3;
 
-    cpu.writeReg(1, tc.rs1_value);
+    cpu.writeReg(1, 10);
+    data_mem->Write(static_cast<uint32_t>(tc.data_in_mem), 10);
 
     cpu.Execute();
+
     auto rd = static_cast<int32_t>(cpu.readReg(3));
     EXPECT_EQ(rd, tc.expected_rd_value);
-
 }
 
-INSTANTIATE_TEST_SUITE_P(I_TYPE_LOAD, Itype_Execute_Test,
+INSTANTIATE_TEST_SUITE_P(I_TYPE_LOAD, Itype_Execute_Load_Test,
 
     ::testing::Values(
-    
+        Itype_Execute_Load_Case{OPERATION::LB, 0xF11, 0x11, "lb_basic"},
+        Itype_Execute_Load_Case{OPERATION::LB, static_cast<int32_t>(0xFFFFFFFF), -1, "lb_sign_extends"},
+
+        Itype_Execute_Load_Case{OPERATION::LH, static_cast<int32_t>(0xDEAD0110), 0x0110, "lh_basic"},
+        Itype_Execute_Load_Case{OPERATION::LH, static_cast<int32_t>(0xFFFFFFFF), -1, "lh_sign_extends"},
+
+        Itype_Execute_Load_Case{OPERATION::LW, static_cast<int32_t>(0xDEAD0110), static_cast<int32_t>(0xDEAD0110), "lw_basic"},
+        Itype_Execute_Load_Case{OPERATION::LW, static_cast<int32_t>(0xFFFFFFFF), -1, "lw_sign_extends"},
+
+        Itype_Execute_Load_Case{OPERATION::LBU, 0xF11, 0x11, "lbu_basic"},
+        Itype_Execute_Load_Case{OPERATION::LBU, static_cast<int32_t>(0xFFFFFFFF), 0x0FF, "lbu_does_not_sign_ext"},
+
+        Itype_Execute_Load_Case{OPERATION::LHU, static_cast<int32_t>(0xDEAD0110), 0x0110, "lhu_basic"},
+        Itype_Execute_Load_Case{OPERATION::LHU, static_cast<int32_t>(0xFFFFFFFF), 0x0FFFF, "lhu_does_not_sign_ext"}
+
     ),
 
-    [](const ::testing::TestParamInfo<Itype_Execute_Case>& info) {
+    [](const ::testing::TestParamInfo<Itype_Execute_Load_Case>& info) {
       return info.param.test_name;
       }
 );
