@@ -248,10 +248,35 @@
 
   void CPU::execute_U_type()
   {
+    // U-type instructions load the immediate into upper bits of the destination register
+    // leaving lower 12 bits as 0
+    auto imm = instruction_fields.imm << 12;
 
+    switch (instruction_fields.Operation) 
+    {
+      case OPERATION::LUI:
+        writeReg(instruction_fields.rd, imm);
+        break;
+
+      case OPERATION::AUIPC:
+        writeReg(instruction_fields.rd, imm + readPC());
+        break;
+
+      default:
+        break;
+    }
   }
 
   void CPU::execute_J_type()
   {
+    auto &rd = instruction_fields.rd;
 
-  }
+    if (instruction_fields.Operation == OPERATION::JAL) 
+    {
+      // Store address of next instruction  
+      writeReg(rd, readPC() + 4);
+      
+      // Jump to specified instruction
+      writePC(instruction_fields.imm + static_cast<int32_t>(readPC()));
+    }
+}
