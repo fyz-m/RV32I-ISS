@@ -23,6 +23,8 @@ target_link_libraries(rv32i_sim PRIVATE iss_core)
 target_compile_options(rv32i_sim PRIVATE -fsanitize=address,undefined)
 target_link_options(rv32i_sim PRIVATE -fsanitize=address,undefined)
 
+
+
 # ── GoogleTest ────────────────────────────────────────────────────────────────
 include(FetchContent)
 FetchContent_Declare(
@@ -34,14 +36,23 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 # ── Test executable ───────────────────────────────────────────────────────────
+
+add_library(iss_core_test
+    src/cpu.cpp
+    src/memory.cpp
+    src/decode.cpp
+)
+target_include_directories(iss_core_test PUBLIC headers)
+target_compile_options(iss_core_test PRIVATE
+    -Wall -Wextra -Wpedantic -Werror  -g3 -O0
+)
+
 add_executable(iss_tests 
                tests/test_decode.cpp
                tests/test_execute.cpp
                )
             
-target_link_libraries(iss_tests PRIVATE iss_core GTest::gtest_main)
-target_compile_options(iss_tests PRIVATE -fsanitize=address,undefined)
-target_link_options(iss_tests PRIVATE -fsanitize=address,undefined)
+target_link_libraries(iss_tests PRIVATE iss_core_test GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(iss_tests)
