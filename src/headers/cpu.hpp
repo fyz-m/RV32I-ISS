@@ -121,6 +121,7 @@ class CPU
 class CPU_test : public CPU{
 
   public:
+    using CPU::CPU;
     using CPU::instruction_fields;
 };
 
