@@ -53,6 +53,7 @@ target_compile_options(iss_core_test PRIVATE
 add_executable(iss_tests 
                tests/test_decode.cpp
                tests/test_execute.cpp
+               tests/test_memory.cpp
                )
             
 target_link_libraries(iss_tests PRIVATE iss_core_test GTest::gtest_main)
