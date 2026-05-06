@@ -8,10 +8,13 @@
 
   RegisterFile::RegisterFile(int width)
       : WIDTH(width)
-      {}
+      {
+        registers[0] = 0;
+      }
 
   void RegisterFile::Write(int address, uint32_t data) 
   {
+    validate_address(address);
     // Register x0 is hardwired to 0 so writes to the first register are ignored
     if (address == 0)
       return;
@@ -21,36 +24,38 @@
 
   uint32_t RegisterFile::Read(int address) const 
   { 
+    validate_address(address);
     return registers[address]; 
+  }
+
+  void RegisterFile::validate_address(int& address) const
+  {
+    if ( !(0 <= address && address < REGISTER_FILE_SIZE) )
+      throw std::out_of_range("Invalid register");
   }
 
 
 
-// Memory Class (32-bit so max 4GB)
 // TODO:
 // out of bounds checking
-// read/write half words (16 bits)
-
-  Memory::Memory(int size, int word_size)
-      : WORD_SIZE{word_size},
-        INSTRUCTION_SIZE{word_size / 8} // number of bytes
+  Memory::Memory(int size)     
   {
     m_memory.reserve(size);
     m_memory.resize(1);
   }
 
-  void Memory::Write(uint8_t data, int address) 
+  void Memory::Write(uint8_t data, std::size_t address) 
   {
     // Write a byte at address
 
     // If address is greater than current length, resize vector
-    if (static_cast<long>(address) >= std::ssize(m_memory)) {
+    if (address >= std::size(m_memory)) {
       m_memory.resize(address + 1);
     }
     m_memory[address] = data;
   }
 
-  void Memory::Write(uint32_t data, int address) 
+  void Memory::Write(uint32_t data, std::size_t address) 
   {
     // Write a word (4 bytes)
     for (int i = 0; i < 4; i++) 
@@ -60,7 +65,7 @@
     }
   }
 
-  void Memory::Write(uint16_t data, int address)
+  void Memory::Write(uint16_t data, std::size_t address)
   {
     // Write a half-word (2 bytes)
     for (int i = 0; i < 2; i++) 
@@ -71,12 +76,12 @@
     }
   }
 
-  uint8_t Memory::Read_Byte(int address) const 
+  uint8_t Memory::Read_Byte(std::size_t address) const 
   { 
     return m_memory[address]; 
   }
 
-  uint32_t Memory::Read_Word(int address) const 
+  uint32_t Memory::Read_Word(std::size_t address) const 
   {
     uint32_t word{};
 
@@ -88,10 +93,10 @@
     return word;
   }
 
-   uint16_t Memory::Read_halfWord(int address) const
-   {
-    return static_cast<uint16_t>(Read_Word(address));
-   }
+  uint16_t Memory::Read_halfWord(std::size_t address) const
+  {
+   return static_cast<uint16_t>(Read_Word(address));
+  }
 
   bool Memory::Load(const char *filepath) 
   {
@@ -112,8 +117,4 @@
     return true;
   }
 
-  int Memory::number_of_words() const 
-  {
-    // number of bits / word_size (bits per word)
-    return (std::ssize(m_memory) * 8) / WORD_SIZE;
-  }
+  
