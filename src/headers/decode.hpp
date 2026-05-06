@@ -25,8 +25,6 @@
 
   void extract_funct7(DecodedInstruction& fields);
 
-  void extract_imm(DecodedInstruction& fields);
-
   void extract_R_type(DecodedInstruction& fields);
 
   void extract_I_type(DecodedInstruction& fields);
